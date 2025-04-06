@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics 12 SPH4U0 - Wave Nature of Light</title>
+    <style>
+        /* --- Minimalist/Apple-Inspired CSS Framework --- */
+        :root {
+            --background-color: #f5f5f7; /* Light grey background */
+            --content-background: #ffffff; /* White content area */
+            --primary-text-color: #1d1d1f; /* Near black for text */
+            --secondary-text-color: #515154; /* Grey for less important text */
+            --accent-color: #007aff; /* Apple blue */
+            --border-color: #d2d2d7; /* Light grey border */
+            --hover-background: #e8e8ed; /* Subtle hover */
+            --code-background: #f0f0f0;
+            --success-color: #34c759; /* Green */
+            --error-color: #ff3b30; /* Red */
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            --standard-padding: 20px;
+            --standard-margin: 20px;
+            --border-radius: 8px;
+            --transition-speed: 0.2s;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--primary-text-color);
+            font-size: 16px;
+        }
+
+        header {
+            background-color: rgba(255, 255, 255, 0.8); /* Slightly transparent white */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 0.8rem 0;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000; /* Ensure header is above nav */
+        }
+
+        header h1 {
+            font-size: 1.8em;
+            font-weight: 600;
+            margin: 0;
+            color: var(--primary-text-color);
+        }
+         header h2 {
+            font-size: 1.2em;
+            font-weight: 400;
+            margin: 5px 0 0 0;
+            color: var(--secondary-text-color);
+        }
+
+        nav {
+            background-color: var(--content-background);
+            padding: 0.5rem;
+            text-align: center;
+            position: sticky;
+            top: 75px; /* Adjust based on header height */
+            z-index: 999;
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto; /* Allow horizontal scrolling on small screens */
+            white-space: nowrap;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        nav ul li {
+            display: inline-block;
+            margin: 0 4px;
+        }
+
+        nav a {
+            color: var(--accent-color);
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        nav a:hover {
+            background-color: var(--hover-background);
+            color: var(--primary-text-color);
+        }
+
+        nav a.active {
+            background-color: var(--accent-color);
+            color: var(--content-background);
+            font-weight: 600;
+        }
+         nav a.active:hover {
+             background-color: #0056b3; /* Darker blue on hover */
+         }
+
+        main {
+            max-width: 950px;
+            margin: var(--standard-margin) auto;
+            padding: var(--standard-padding);
+            background-color: var(--content-background);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            border-radius: var(--border-radius);
+        }
+
+        section {
+            margin-bottom: 40px; /* Increased spacing */
+            padding-top: 130px; /* Offset for sticky header+nav */
+            margin-top: -130px; /* Negative margin to counteract padding */
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 30px;
+        }
+        section:last-of-type {
+             border-bottom: none;
+        }
+
+        h2 {
+            font-size: 1.6em;
+            font-weight: 600;
+            color: var(--primary-text-color);
+            /* border-bottom: 2px solid var(--accent-color); */
+            padding-bottom: 8px;
+            margin-bottom: var(--standard-margin);
+            margin-top: 0;
+        }
+
+        h3 {
+            font-size: 1.3em;
+            font-weight: 500;
+            color: var(--primary-text-color);
+            margin-top: 1.8em;
+            margin-bottom: 0.8em;
+        }
+
+        canvas {
+            border: 1px solid var(--border-color);
+            display: block;
+            margin: var(--standard-margin) auto;
+            background-color: #fdfdfd; /* Slightly off-white canvas background */
+            border-radius: 4px;
+            max-width: 100%; /* Ensure canvas scales down */
+            height: auto; /* Maintain aspect ratio */
+        }
+
+        .controls {
+            margin-bottom: var(--standard-margin);
+            padding: 15px;
+            background-color: var(--background-color);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            display: grid; /* Use grid for alignment */
+            grid-template-columns: auto 1fr auto; /* Label, slider/input, value */
+            gap: 10px 15px; /* Row gap, column gap */
+            align-items: center; /* Vertically center items in grid row */
+        }
+
+        .controls label,
+        .controls button {
+            font-size: 0.95em;
+            color: var(--secondary-text-color);
+            justify-self: end; /* Align labels to the right */
+        }
+        .controls button {
+             grid-column: 1 / -1; /* Make button span all columns */
+             justify-self: start;
+             margin-top: 10px;
+        }
+
+        .controls input[type="range"] {
+            width: 100%; /* Make range sliders fill available space */
+            vertical-align: middle;
+            accent-color: var(--accent-color); /* Style the slider thumb/track */
+            cursor: pointer;
+        }
+
+        .controls span { /* Value display */
+            display: inline-block;
+            min-width: 45px;
+            text-align: left;
+            font-weight: 500;
+            color: var(--primary-text-color);
+            font-size: 0.95em;
+        }
+
+        code {
+            background-color: var(--code-background);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-family: "SF Mono", Monaco, Consolas, "Courier New", monospace;
+            font-size: 0.9em;
+            border: 1px solid var(--border-color);
+        }
+
+        ul {
+            margin-left: var(--standard-padding);
+            padding-left: var(--standard-padding);
+            list-style: disc;
+            color: var(--secondary-text-color);
+        }
+        ul li { margin-bottom: 8px; }
+        ul ul { margin-top: 8px; }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+        }
+
+        button:hover {
+            background-color: #0056b3; /* Darker blue */
+            transform: translateY(-1px); /* Subtle lift */
+        }
+
+        button:active {
+            transform: translateY(0px);
+        }
+
+        /* --- Quiz Specific Styles --- */
+        .quiz-question {
+            background-color: #ffffff;
+            padding: var(--standard-padding);
+            margin-bottom: var(--standard-margin);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+        }
+
+        .quiz-question p {
+            margin-top: 0;
+            margin-bottom: 15px;
+             font-weight: 500;
+        }
+
+        .quiz-question label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: var(--secondary-text-color);
+            font-weight: 500;
+        }
+
+        .quiz-question input[type="number"],
+        .quiz-question input[type="text"] {
+            padding: 8px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: var(--font-family);
+            font-size: 1em;
+            margin-right: 10px;
+            width: 120px; /* Adjust as needed */
+        }
+        .quiz-question input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+        }
+
+
+        .quiz-feedback {
+            display: inline-block; /* Keep feedback next to input */
+            margin-left: 10px;
+            font-weight: 600;
+            font-size: 0.9em;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .feedback-correct {
+            color: var(--success-color);
+            /* background-color: rgba(52, 199, 89, 0.1); */
+        }
+
+        .feedback-incorrect {
+            color: var(--error-color);
+            /* background-color: rgba(255, 59, 48, 0.1); */
+        }
+
+        #check-quiz1 {
+            margin-top: var(--standard-margin);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            nav {
+                 top: 65px; /* Adjust sticky position */
+                 padding: 0.5rem 10px; /* Add horizontal padding */
+            }
+            section {
+                 padding-top: 110px;
+                 margin-top: -110px;
+            }
+            main {
+                 margin: 10px;
+                 padding: 15px;
+            }
+             h1 { font-size: 1.6em; }
+             h2 { font-size: 1.4em; }
+             .controls {
+                 grid-template-columns: auto 1fr; /* Stack label/value below slider */
+             }
+             .controls label { justify-self: start;}
+             .controls span { grid-column: 2 / 3; justify-self: start;}
+             .quiz-question input[type="number"] { width: 100px;}
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Physics 12 University SPH 4U0</h1>
+        <h2>Unit 4: The Wave Nature of Light</h2>
+    </header>
+
+    <nav id="navbar">
+        <ul>
+            <li><a href="#s9-1" class="active">9.1 Waves</a></li>
+            <li><a href="#s9-2">9.2 Refraction</a></li>
+            <li><a href="#s9-3">9.3 Water Waves</a></li>
+            <li><a href="#s9-4">9.4 Wave/Particle</a></li>
+            <li><a href="#s9-5">9.5 Double Slit</a></li>
+            <li><a href="#s10-1">10.1 Thin Films</a></li>
+            <li><a href="#s10-2">10.2 Single Slit</a></li>
+            <li><a href="#s10-3">10.3 Grating</a></li>
+            <li><a href="#s10-4">10.4 EM Radiation</a></li>
+            <li><a href="#s10-5">10.5 Polarization</a></li>
+            <li><a href="#quizzes">Quizzes</a></li>
+            <li><a href="#other-units">Other Units</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Unit 4 Content Sections (Keep the existing canvas/controls HTML from previous steps) -->
+        <section id="s9-1">
+            <h2>9.1 Properties of Waves and Light (p 440)</h2>
+            <p>Waves transfer energy without transferring matter. Key properties include periodicity, wavelength (λ), amplitude (A), frequency (f), phase, and the universal wave equation <code>v = fλ</code>. Reflection involves waves bouncing off surfaces according to the law of reflection (θi = θr).</p>
+             <ul>
+                 <li><strong>Specular Reflection:</strong> Off smooth surfaces (mirror-like).</li>
+                 <li><strong>Diffuse Reflection:</strong> Off rough surfaces (scattered).</li>
+             </ul>
+            <h3>Interactive Wave Visualization</h3>
+            <div class="controls">
+                <label for="amplitudeSlider">Amplitude:</label>
+                <input type="range" id="amplitudeSlider" min="10" max="50" value="30">
+                <span id="amplitudeValue">30</span> px<br>
+                <label for="wavelengthSlider">Wavelength:</label>
+                <input type="range" id="wavelengthSlider" min="50" max="200" value="100">
+                <span id="wavelengthValue">100</span> px
+            </div>
+            <canvas id="waveCanvas" width="600" height="200"></canvas>
+        </section>
+
+        <section id="s9-2">
+             <h2>9.2 Refraction and Total Internal Reflection (p 444)</h2>
+             <p>Refraction is the bending of light as it changes medium and speed, governed by Snell's Law: <code>n₁ sin(θ₁) = n₂ sin(θ₂)</code>. Total Internal Reflection (TIR) occurs when light moves from a denser to a less dense medium beyond the critical angle (<code>sin(θc) = n₂ / n₁</code>).</p>
+              <ul>
+                  <li><strong>Index of Refraction (n):</strong> Ratio of light speed in vacuum to speed in medium (<code>n = c/v</code>).</li>
+                  <li><strong>Dispersion:</strong> Wavelength-dependent refraction (e.g., prisms).</li>
+              </ul>
+             <h3>Interactive Refraction & TIR Simulation</h3>
+             <div class="controls">
+                 <label for="angleSlider">Angle of Incidence:</label>
+                 <input type="range" id="angleSlider" min="0" max="89" value="30">
+                 <span id="angleValue">30</span>°<br>
+                 <label for="n1Slider">Index n₁ (Top):</label>
+                 <input type="range" id="n1Slider" min="1.0" max="2.5" step="0.01" value="1.00">
+                 <span id="n1Value">1.00</span><br>
+                 <label for="n2Slider">Index n₂ (Bottom):</label>
+                 <input type="range" id="n2Slider" min="1.0" max="2.5" step="0.01" value="1.50">
+                 <span id="n2Value">1.50</span>
+             </div>
+             <canvas id="refractionCanvas" width="600" height="300"></canvas>
+             <p id="tirStatus" style="text-align: center; font-weight: bold; color: var(--error-color);"></p>
+        </section>
+
+        <section id="s9-3">
+            <h2>9.3 Diffraction & Interference of Water Waves (p 459)</h2>
+            <p>Diffraction is wave spreading through openings or around obstacles (significant when λ ≈ w). Interference is the superposition of waves.</p>
+             <ul>
+                 <li><strong>Constructive Interference:</strong> Waves in phase add up (Maxima, path difference = nλ).</li>
+                 <li><strong>Destructive Interference:</strong> Waves out of phase cancel (Minima, path difference = (n + 1/2)λ).</li>
+             </ul>
+            <h3>Simplified Diffraction/Interference Visualization</h3>
+            <div class="controls">
+                 <label for="slitWidthSlider">Slit Width (w):</label>
+                 <input type="range" id="slitWidthSlider" min="1" max="20" value="5">
+                 <span id="slitWidthValue">5</span> (rel.)<br>
+                 <label for="waterWavelengthSlider">Wavelength (λ):</label>
+                 <input type="range" id="waterWavelengthSlider" min="1" max="10" value="5">
+                 <span id="waterWavelengthValue">5</span> (rel.)
+            </div>
+             <p>(Note: This is a highly simplified representation of wave propagation)</p>
+             <canvas id="diffractionCanvas" width="600" height="250"></canvas>
+        </section>
+
+        <!-- Use the Enhanced Huygens' Principle HTML/Canvas/Controls from the previous step -->
+        <section id="s9-4">
+            <h2>9.4 Light: Wave or Particle? (p 470)</h2>
+            <p>Historically, there were competing theories about the nature of light.</p>
+            <ul>
+                 <li><strong>Newton's Particle Theory (Corpuscular Theory):</strong> Light as particles. Explained reflection/refraction (partially). Failed on diffraction/interference.</li>
+                 <li><strong>Huygens' Principle:</strong> Each point on a wavefront is a source of secondary wavelets; the envelope forms the new wavefront. Explained reflection, refraction, diffraction.</li>
+                 <li><strong>Modern View (Wave-Particle Duality):</strong> Light exhibits both wave (interference, diffraction) and particle (photoelectric effect) properties.</li>
+            </ul>
+            <h3>Huygens' Principle Animation</h3>
+            <p>Each point on a wavefront acts as a source of new spherical wavelets. The envelope tangent to these wavelets forms the next wavefront. Watch how a plane wave propagates and diffracts through a slit.</p>
+             <div class="controls">
+                <button id="huygensPlayPause">Pause</button>
+                <label for="huygensSpeed">Speed:</label>
+                <input type="range" id="huygensSpeed" min="0.1" max="2" step="0.1" value="0.5">
+                 <span id="huygensSpeedValue">0.5</span> <!-- Added span for value display -->
+                <label for="huygensSlitWidth">Slit Width:</label>
+                <input type="range" id="huygensSlitWidth" min="0" max="200" step="10" value="80">
+                <span id="huygensSlitWidthValue">80</span> px
+                 <label for="huygensShowSlit" style="justify-self: start;">Show Slit:</label> <!-- Adjusted label alignment -->
+                <input type="checkbox" id="huygensShowSlit" checked style="justify-self: start;">
+             </div>
+             <canvas id="huygensCanvas" width="600" height="300"></canvas>
+        </section>
+
+        <section id="s9-5">
+             <h2>9.5 Interference of Light Waves: Young's Double-Slit Experiment (p 477)</h2>
+             <p>Young's experiment demonstrated light interference by passing it through two narrow slits, creating a pattern of bright (constructive) and dark (destructive) fringes on a screen.</p>
+             <ul>
+                 <li>Path difference ≈ <code>d sin(θ)</code>.</li>
+                 <li>Bright Fringes (Maxima): <code>d sin(θ) = mλ</code></li>
+                 <li>Dark Fringes (Minima): <code>d sin(θ) = (m + 1/2)λ</code></li>
+             </ul>
+            <h3>Double Slit Interference Pattern Simulation</h3>
+            <div class="controls">
+                 <label for="doubleSlitLambdaSlider">Wavelength (λ):</label>
+                 <input type="range" id="doubleSlitLambdaSlider" min="400" max="700" value="550">
+                 <span id="doubleSlitLambdaValue">550</span> nm<br>
+                 <label for="doubleSlitDSlider">Slit Separation (d):</label>
+                 <input type="range" id="doubleSlitDSlider" min="0.05" max="0.5" step="0.01" value="0.15">
+                 <span id="doubleSlitDValue">0.15</span> mm
+            </div>
+             <p>(Screen distance L is fixed in this simulation)</p>
+             <canvas id="doubleSlitCanvas" width="600" height="150"></canvas>
+        </section>
+
+        <!-- Use the Enhanced Thin Film HTML/Canvas/Controls from the previous step -->
+        <section id="s10-1">
+            <h2>10.1 Interference in Thin Films (p 502)</h2>
+            <p>Colors in soap bubbles or oil slicks arise from interference between light reflecting off the top and bottom surfaces of a thin film. Interference depends on thickness (t), film index (n_film), wavelength (λ), and phase changes upon reflection.</p>
+            <ul>
+                <li><strong>Phase Change:</strong> 180° (λ/2) shift if reflecting off a higher index medium.</li>
+                <li><strong>Path Difference ≈ 2t</strong> (for normal incidence). Wavelength in film is λ/n_film.</li>
+            </ul>
+            <h3>Thin Film Interference Color Simulation (Normal Incidence)</h3>
+            <div class="controls">
+                <label for="filmThicknessSlider">Film Thickness (t):</label>
+                <input type="range" id="filmThicknessSlider" min="0" max="1000" value="200" step="5">
+                <span id="filmThicknessValue">200</span> nm<br>
+                <label for="filmIndexSlider">Film Index (n_film):</label>
+                <input type="range" id="filmIndexSlider" min="1.0" max="2.5" step="0.01" value="1.33">
+                <span id="filmIndexValue">1.33</span><br>
+                <label>Incident Medium:</label> <!-- Simplified label -->
+                <span>n=1.00 (Air)</span><br>
+                 <label for="substrateIndexSlider">Substrate Index (n_sub):</label>
+                 <input type="range" id="substrateIndexSlider" min="1.0" max="2.5" step="0.01" value="1.50">
+                 <span id="substrateIndexValue">1.50</span>
+            </div>
+            <canvas id="thinFilmCanvas" width="600" height="250"></canvas>
+            <div style="display: flex; justify-content: space-around; margin-top: 20px; flex-wrap: wrap; gap: 20px;">
+                 <div style="text-align: center;">
+                    <p style="margin-bottom: 5px;"><b>Calculated Reflected Color:</b></p>
+                    <div id="reflectedColorBox" style="width: 100px; height: 50px; border: 1px solid var(--border-color); margin: 0 auto; border-radius: 4px;"></div>
+                 </div>
+                 <div id="filmInterferenceResult" style="text-align: left; max-width: 350px;">
+                     <p style="margin-bottom: 5px;"><b>Interference Details:</b></p>
+                     <span id="interferenceText" style="font-size: 0.9em; color: var(--secondary-text-color);"></span>
+                 </div>
+            </div>
+        </section>
+
+        <section id="s10-2">
+             <h2>10.2 Single Slit Diffraction (p 512)</h2>
+             <p>Light passing through a single slit spreads out (diffracts), creating a pattern with a wide central maximum and dimmer, narrower side maxima, separated by minima.</p>
+             <ul>
+                  <li>Minima occur at angles where <code>w sin(θ) = mλ</code> (m = ±1, ±2, ...; w = slit width).</li>
+                  <li>Central maximum is twice as wide as secondary maxima.</li>
+             </ul>
+             <h3>Single Slit Diffraction Pattern Simulation</h3>
+             <div class="controls">
+                  <label for="singleSlitLambdaSlider">Wavelength (λ):</label>
+                  <input type="range" id="singleSlitLambdaSlider" min="400" max="700" value="500">
+                  <span id="singleSlitLambdaValue">500</span> nm<br>
+                  <label for="singleSlitWidthSlider">Slit Width (w):</label>
+                  <input type="range" id="singleSlitWidthSlider" min="0.001" max="0.02" step="0.001" value="0.005">
+                  <span id="singleSlitWidthValue">0.005</span> mm
+             </div>
+              <p>(Screen distance L is fixed in this simulation)</p>
+              <canvas id="singleSlitCanvas" width="600" height="150"></canvas>
+        </section>
+
+         <section id="s10-3">
+             <h2>10.3 The Diffraction Grating (p 520)</h2>
+             <p>A device with many equally spaced slits (or lines) that produces very sharp and widely separated interference maxima (principal maxima) due to combined diffraction and multi-slit interference.</p>
+             <ul>
+                 <li>Principal Maxima occur at angles where <code>d sin(θ) = mλ</code> (m = 0, ±1, ±2, ...; d = grating spacing).</li>
+                 <li>Used in spectrometers to separate wavelengths accurately.</li>
+             </ul>
+            <h3>Diffraction Grating Pattern Simulation</h3>
+            <div class="controls">
+                 <label for="gratingLambdaSlider">Wavelength (λ):</label>
+                 <input type="range" id="gratingLambdaSlider" min="400" max="700" value="600">
+                 <span id="gratingLambdaValue">600</span> nm<br>
+                 <label for="gratingDSlider">Grating Spacing (d):</label>
+                 <input type="range" id="gratingDSlider" min="1000" max="5000" step="100" value="2000">
+                 <span id="gratingDValue">2000</span> nm
+            </div>
+             <p>(Intensity profile is simplified - shows sharp maxima locations)</p>
+             <canvas id="gratingCanvas" width="600" height="150"></canvas>
+        </section>
+
+         <section id="s10-4">
+             <h2>10.4 Electromagnetic Radiation (p 526)</h2>
+             <p>Light is a transverse electromagnetic wave consisting of oscillating perpendicular electric (E) and magnetic (B) fields propagating at speed c in vacuum (<code>c = fλ ≈ 3.00 × 10⁸ m/s</code>).</p>
+             <ul>
+                 <li>EM Spectrum: Includes radio waves, microwaves, infrared, visible light, ultraviolet, X-rays, gamma rays, ordered by wavelength/frequency.</li>
+             </ul>
+            <h3>Electromagnetic Wave Visualization</h3>
+             <div class="controls">
+                <button id="animateEMWaveButton">Pause</button>
+                <label for="emWaveSpeedSlider">Animation Speed:</label>
+                <input type="range" id="emWaveSpeedSlider" min="0.1" max="2" step="0.1" value="0.5">
+                 <span id="emWaveSpeedValue">0.5</span>
+             </div>
+             <canvas id="emWaveCanvas" width="600" height="250"></canvas>
+        </section>
+
+         <section id="s10-5">
+            <h2>10.5 Polarization of Light (p 532)</h2>
+            <p>Polarization describes the orientation of the electric field oscillations in a transverse wave. Unpolarized light (e.g., from the sun) has random E-field orientations, while linearly polarized light has oscillations in a single plane.</p>
+             <ul>
+                 <li><strong>Polarizers:</strong> Filter light, transmitting only components aligned with their transmission axis.</li>
+                 <li><strong>Malus's Law:</strong> Transmitted intensity <code>I = I₀ cos²(θ)</code>, where θ is the angle between the incident polarization and the analyzer's axis.</li>
+                 <li><strong>Methods:</strong> Selective absorption (filters), reflection (Brewster's angle), scattering (sky), birefringence.</li>
+             </ul>
+            <h3>Polarization Simulation (Polarizer & Analyzer)</h3>
+            <div class="controls">
+                 <label for="analyzerAngleSlider">Analyzer Angle (θ):</label>
+                 <input type="range" id="analyzerAngleSlider" min="0" max="180" value="0">
+                 <span id="analyzerAngleValue">0</span>°
+            </div>
+             <p>Unpolarized light → Ideal Polarizer (Vertical) → Analyzer → Output</p>
+             <canvas id="polarizationCanvas" width="600" height="150"></canvas>
+             <p id="malusResult" style="text-align: center; font-weight: 500; margin-top: 15px;"></p>
+        </section>
+
+        <!-- Placeholder for Quizzes -->
+        <section id="quizzes">
+            <h2>Quizzes & Tests</h2>
+            <p>Test your understanding of the concepts covered in this unit.</p>
+            <ul>
+                <li><a href="#mock-quiz-1" style="color: var(--accent-color); text-decoration: none;">Unit 4 Mock Quiz 1 (Refraction, Interference)</a></li>
+                <!-- Add links to future quizzes/tests here -->
+                 <li>Unit 4 Mock Test (Coming Soon)</li>
+            </ul>
+        </section>
+
+        <!-- Mock Quiz 1 Section -->
+        <section id="mock-quiz-1">
+            <h2>Unit 4 Mock Quiz 1</h2>
+            <p>Answer the following questions. Use appropriate significant figures.</p>
+
+            <div class="quiz-question">
+                <p>1. Calculate the angle of refraction for light traveling at 35.5 degrees from oil (n = 1.64) into water (n = 1.33). If the light travels back from water into the oil at the refracted angle, at what angle will it refract back into the oil?</p>
+                <div>
+                    <label for="quiz1-q1-ans1">Angle in Water (degrees):</label>
+                    <input type="number" id="quiz1-q1-ans1" step="0.1">
+                    <span class="quiz-feedback" id="quiz1-q1-feedback1"></span>
+                </div>
+                 <div style="margin-top: 10px;">
+                    <label for="quiz1-q1-ans2">Angle back in Oil (degrees):</label>
+                    <input type="number" id="quiz1-q1-ans2" step="0.1">
+                    <span class="quiz-feedback" id="quiz1-q1-feedback2"></span>
+                </div>
+            </div>
+
+            <div class="quiz-question">
+                <p>2. Blue light of wavelength 477 nm falls on double slits separated by 0.23 mm. An interference pattern is created on a screen 2.45 m away. How far from the central maximum on either side are the 4th-order dark fringes (m=3)?</p>
+                 <!-- Note: 4th order dark fringe corresponds to m=3 in x = (m+1/2)λL/d -->
+                <div>
+                    <label for="quiz1-q2-ans">Distance from center (m):</label>
+                    <input type="number" id="quiz1-q2-ans" step="0.0001">
+                    <span class="quiz-feedback" id="quiz1-q2-feedback"></span>
+                </div>
+            </div>
+
+            <div class="quiz-question">
+                <p>3. What ratio of slit separation to wavelength (d/λ) would produce exactly zero nodal lines (dark fringes) besides the central maximum (i.e., the first minimum is at or beyond 90 degrees)?</p>
+                <!-- Condition for first minimum: d sin(theta) = (0+1/2)λ. If theta >= 90 (sin(theta)>=1), then d/λ >= 1/2 -->
+                <div>
+                    <label for="quiz1-q3-ans">Minimum ratio d/λ:</label>
+                    <input type="number" id="quiz1-q3-ans" step="0.01">
+                    <span class="quiz-feedback" id="quiz1-q3-feedback"></span>
+                </div>
+            </div>
+
+            <div class="quiz-question">
+                <p>4. Two slits are separated by a distance of 0.067 mm. A monochromatic beam of light with a wavelength of 555 nm falls on the slit and produces an interference pattern on a screen that is 3.05 m from the slits. Calculate the fringe separation distance between the centers of the 1st nodal line (m=0) and the 5th nodal line (m=4) on the same side of the central maximum.</p>
+                 <!-- Nodal line position x = (m+1/2)λL/d. We need x_4 - x_0 -->
+                 <div>
+                    <label for="quiz1-q4-ans">Separation Distance (m):</label>
+                    <input type="number" id="quiz1-q4-ans" step="0.0001">
+                    <span class="quiz-feedback" id="quiz1-q4-feedback"></span>
+                </div>
+            </div>
+
+            <button id="check-quiz1">Check Answers</button>
+
+        </section>
+
+        <!-- Placeholder for Other Units -->
+        <section id="other-units">
+            <h2>Other Units</h2>
+            <p>Navigate to other units in the Physics 12 SPH4U0 course.</p>
+            <ul>
+                <li>Unit 1: Kinematics & Dynamics (Link Placeholder)</li>
+                <li>Unit 2: Energy & Momentum (Link Placeholder)</li>
+                <li>Unit 3: Gravitational, Electric, and Magnetic Fields (Link Placeholder)</li>
+                <li>Unit 5: Modern Physics (Link Placeholder)</li>
+                <!-- Structure suggestion: These could link to different HTML files -->
+                <!-- e.g., <a href="../unit1/index.html">Unit 1</a> -->
+                 <li><a href="https://github.com/sahnan2007/Physics-12" target="_blank" style="color: var(--accent-color); text-decoration: none;">Return to Main Course Page (Example Link)</a></li>
+            </ul>
+            <p><i>(Navigation between units would typically involve separate pages for better organization, but placeholders are included here.)</i></p>
+        </section>
+
+    </main>
+
+    <script>
+        // --- Utility Functions ---
+        function degreesToRadians(degrees) {
+            return degrees * Math.PI / 180;
+        }
+
+        function radiansToDegrees(radians) {
+            return radians * 180 / Math.PI;
+        }
+
+        // --- 9.1 Properties of Waves ---
+        const waveCanvas = document.getElementById('waveCanvas');
+        const waveCtx = waveCanvas.getContext('2d');
+        const amplitudeSlider = document.getElementById('amplitudeSlider');
+        const wavelengthSlider = document.getElementById('wavelengthSlider');
+        const amplitudeValue = document.getElementById('amplitudeValue');
+        const wavelengthValue = document.getElementById('wavelengthValue');
+        let wavePhase = 0;
+
+        function drawWave() {
+            const width = waveCanvas.width;
+            const height = waveCanvas.height;
+            const amplitude = parseInt(amplitudeSlider.value);
+            const wavelength = parseInt(wavelengthSlider.value);
+            const k = 2 * Math.PI / wavelength; // Wave number
+            const omega = 0.05; // Angular frequency for animation (arbitrary)
+
+            amplitudeValue.textContent = amplitude;
+            wavelengthValue.textContent = wavelength;
+
+            waveCtx.clearRect(0, 0, width, height);
+            waveCtx.strokeStyle = '#007bff';
+            waveCtx.lineWidth = 2;
+            waveCtx.beginPath();
+            waveCtx.moveTo(0, height / 2);
+
+            for (let x = 0; x < width; x++) {
+                const y = height / 2 + amplitude * Math.sin(k * x + wavePhase);
+                waveCtx.lineTo(x, y);
+            }
+            waveCtx.stroke();
+
+            // Draw equilibrium line
+            waveCtx.strokeStyle = '#ccc';
+            waveCtx.lineWidth = 1;
+            waveCtx.beginPath();
+            waveCtx.moveTo(0, height / 2);
+            waveCtx.lineTo(width, height / 2);
+            waveCtx.stroke();
+
+             // Draw Amplitude and Wavelength indicators (simplified)
+             waveCtx.fillStyle = 'red';
+             waveCtx.fillText(`Amplitude (A = ${amplitude}px)`, 10, 20);
+             waveCtx.fillText(`Wavelength (λ = ${wavelength}px)`, width - 150, 20);
+
+             // Draw crest/trough indicator (approximate)
+             let firstCrestX = -1;
+             for (let x = 0; x < width; x++) {
+                 if (Math.sin(k * x + wavePhase) > 0.98) { firstCrestX = x; break; }
+             }
+             if(firstCrestX > 0) {
+                 waveCtx.fillText('Crest', firstCrestX - 15, height/2 - amplitude - 5);
+                 waveCtx.beginPath();
+                 waveCtx.moveTo(firstCrestX, height/2);
+                 waveCtx.lineTo(firstCrestX + wavelength, height/2);
+                 waveCtx.stroke(); // For wavelength line
+                 waveCtx.fillText('λ', firstCrestX + wavelength/2 - 5, height/2 + 15);
+
+                 waveCtx.beginPath();
+                 waveCtx.moveTo(firstCrestX, height/2);
+                 waveCtx.lineTo(firstCrestX, height/2 - amplitude);
+                 waveCtx.stroke(); // For amplitude line
+                 waveCtx.fillText('A', firstCrestX + 5, height/2 - amplitude/2);
+             }
+
+             wavePhase += omega; // Simple animation progression
+        }
+
+        amplitudeSlider.addEventListener('input', drawWave);
+        wavelengthSlider.addEventListener('input', drawWave);
+        //setInterval(drawWave, 50); // Animate the wave
+        drawWave(); // Initial draw
+
+        // --- 9.2 Refraction & TIR ---
+        const refractionCanvas = document.getElementById('refractionCanvas');
+        const refractionCtx = refractionCanvas.getContext('2d');
+        const angleSlider = document.getElementById('angleSlider');
+        const n1Slider = document.getElementById('n1Slider');
+        const n2Slider = document.getElementById('n2Slider');
+        const angleValue = document.getElementById('angleValue');
+        const n1Value = document.getElementById('n1Value');
+        const n2Value = document.getElementById('n2Value');
+        const tirStatus = document.getElementById('tirStatus');
+
+        function drawRefraction() {
+            const width = refractionCanvas.width;
+            const height = refractionCanvas.height;
+            const interfaceY = height / 2;
+            const centerX = width / 3; // Point of incidence
+
+            const angle1_deg = parseInt(angleSlider.value);
+            const n1 = parseFloat(n1Slider.value);
+            const n2 = parseFloat(n2Slider.value);
+            const angle1_rad = degreesToRadians(angle1_deg);
+
+            angleValue.textContent = angle1_deg;
+            n1Value.textContent = n1.toFixed(2);
+            n2Value.textContent = n2.toFixed(2);
+            tirStatus.textContent = ''; // Clear status initially
+
+            refractionCtx.clearRect(0, 0, width, height);
+
+            // Draw media
+            refractionCtx.fillStyle = 'rgba(173, 216, 230, 0.3)'; // Light blue top
+            refractionCtx.fillRect(0, 0, width, interfaceY);
+            refractionCtx.fillStyle = 'rgba(144, 238, 144, 0.3)'; // Light green bottom
+            refractionCtx.fillRect(0, interfaceY, width, height - interfaceY);
+            refractionCtx.fillStyle = '#000';
+            refractionCtx.fillText(`n₁ = ${n1.toFixed(2)}`, 10, 20);
+            refractionCtx.fillText(`n₂ = ${n2.toFixed(2)}`, 10, height - 10);
+
+
+            // Draw interface & normal
+            refractionCtx.strokeStyle = '#000';
+            refractionCtx.lineWidth = 2;
+            refractionCtx.beginPath();
+            refractionCtx.moveTo(0, interfaceY);
+            refractionCtx.lineTo(width, interfaceY);
+            refractionCtx.stroke();
+
+            refractionCtx.strokeStyle = '#888';
+            refractionCtx.lineWidth = 1;
+            refractionCtx.setLineDash([5, 5]);
+            refractionCtx.beginPath();
+            refractionCtx.moveTo(centerX, 0);
+            refractionCtx.lineTo(centerX, height);
+            refractionCtx.stroke();
+            refractionCtx.setLineDash([]); // Reset dash
+
+            // Calculate incident ray endpoint
+            const incidentLength = interfaceY / Math.cos(angle1_rad);
+            const incidentEndX = centerX - incidentLength * Math.sin(angle1_rad);
+            const incidentEndY = 0;
+
+            // Draw incident ray
+            refractionCtx.strokeStyle = 'red';
+            refractionCtx.lineWidth = 2;
+            refractionCtx.beginPath();
+            refractionCtx.moveTo(incidentEndX, incidentEndY);
+            refractionCtx.lineTo(centerX, interfaceY);
+            refractionCtx.stroke();
+            refractionCtx.fillText(`θ₁=${angle1_deg}°`, centerX - 40, interfaceY - 10);
+
+            // Draw reflected ray (angle1 = angle_reflection)
+            const reflectedEndX = centerX + incidentLength * Math.sin(angle1_rad);
+            const reflectedEndY = 0;
+            refractionCtx.strokeStyle = 'orange';
+             refractionCtx.lineWidth = 1.5;
+            refractionCtx.beginPath();
+            refractionCtx.moveTo(centerX, interfaceY);
+            refractionCtx.lineTo(reflectedEndX, reflectedEndY);
+            refractionCtx.stroke();
+
+
+            // Calculate refraction angle using Snell's Law
+            const sin_angle2 = (n1 / n2) * Math.sin(angle1_rad);
+
+            if (Math.abs(sin_angle2) <= 1) {
+                const angle2_rad = Math.asin(sin_angle2);
+                const angle2_deg = radiansToDegrees(angle2_rad);
+
+                // Draw refracted ray
+                const refractedLength = (height - interfaceY) / Math.cos(angle2_rad);
+                const refractedEndX = centerX + refractedLength * Math.sin(angle2_rad);
+                const refractedEndY = height;
+
+                refractionCtx.strokeStyle = 'blue';
+                 refractionCtx.lineWidth = 2;
+                refractionCtx.beginPath();
+                refractionCtx.moveTo(centerX, interfaceY);
+                refractionCtx.lineTo(refractedEndX, refractedEndY);
+                refractionCtx.stroke();
+                refractionCtx.fillText(`θ₂=${angle2_deg.toFixed(1)}°`, centerX + 10, interfaceY + 20);
+
+            } else {
+                // Total Internal Reflection
+                 tirStatus.textContent = 'Total Internal Reflection Occurring!';
+                 // Reflected ray already drawn, maybe make it thicker?
+                 refractionCtx.strokeStyle = 'orange';
+                 refractionCtx.lineWidth = 3;
+                 refractionCtx.beginPath();
+                 refractionCtx.moveTo(centerX, interfaceY);
+                 refractionCtx.lineTo(reflectedEndX, reflectedEndY);
+                 refractionCtx.stroke();
+
+                 // Calculate critical angle for display
+                 if (n1 > n2) {
+                    const criticalAngleRad = Math.asin(n2 / n1);
+                    const criticalAngleDeg = radiansToDegrees(criticalAngleRad);
+                    tirStatus.textContent += ` (Critical Angle θc = ${criticalAngleDeg.toFixed(1)}°)`;
+                 }
+            }
+        }
+
+        angleSlider.addEventListener('input', drawRefraction);
+        n1Slider.addEventListener('input', drawRefraction);
+        n2Slider.addEventListener('input', drawRefraction);
+        drawRefraction(); // Initial draw
+
+        // --- 9.3 Water Wave Diffraction ---
+        const diffractionCanvas = document.getElementById('diffractionCanvas');
+        const diffractionCtx = diffractionCanvas.getContext('2d');
+        const slitWidthSlider = document.getElementById('slitWidthSlider');
+        const waterWavelengthSlider = document.getElementById('waterWavelengthSlider');
+        const slitWidthValue = document.getElementById('slitWidthValue');
+        const waterWavelengthValue = document.getElementById('waterWavelengthValue');
+
+        function drawDiffraction() {
+            const width = diffractionCanvas.width;
+            const height = diffractionCanvas.height;
+            const slitWidth = parseInt(slitWidthSlider.value) * 5; // Scale factor
+            const wavelength = parseInt(waterWavelengthSlider.value) * 5; // Scale factor
+            const barrierX = width / 3;
+            const slitY_center = height / 2;
+            const slitTop = slitY_center - slitWidth / 2;
+            const slitBottom = slitY_center + slitWidth / 2;
+
+            slitWidthValue.textContent = slitWidthSlider.value;
+            waterWavelengthValue.textContent = waterWavelengthSlider.value;
+
+            diffractionCtx.clearRect(0, 0, width, height);
+
+            // Draw barrier
+            diffractionCtx.fillStyle = '#666';
+            diffractionCtx.fillRect(barrierX - 5, 0, 10, slitTop);
+            diffractionCtx.fillRect(barrierX - 5, slitBottom, 10, height - slitBottom);
+
+            // Draw incoming plane waves (simplified)
+            diffractionCtx.strokeStyle = '#007bff';
+            diffractionCtx.lineWidth = 1;
+            for (let x = barrierX - wavelength; x > 0; x -= wavelength) {
+                diffractionCtx.beginPath();
+                diffractionCtx.moveTo(x, 0);
+                diffractionCtx.lineTo(x, height);
+                diffractionCtx.stroke();
+            }
+
+             // Draw diffracted waves (highly simplified - just arcs)
+             const numArcs = Math.floor((width - barrierX) / wavelength);
+             const spreadFactor = wavelength / (slitWidth / 5); // More spread for smaller slit/longer wavelength
+
+             diffractionCtx.strokeStyle = '#007bff';
+             diffractionCtx.lineWidth = 1.5;
+             for (let i = 1; i <= numArcs; i++) {
+                 const radius = i * wavelength;
+                 diffractionCtx.beginPath();
+                 // Angle limits based on simplified diffraction idea
+                 const maxAngle = Math.atan(spreadFactor) * 0.8; // Limit the spread angle
+                 diffractionCtx.arc(barrierX, slitY_center, radius, -maxAngle, maxAngle);
+                 diffractionCtx.stroke();
+             }
+        }
+
+        slitWidthSlider.addEventListener('input', drawDiffraction);
+        waterWavelengthSlider.addEventListener('input', drawDiffraction);
+        drawDiffraction(); // Initial draw
+
+
+        // --- 9.4 Enhanced Huygens' Principle ---
+        const huygensCanvas = document.getElementById('huygensCanvas');
+        const huygensCtx = huygensCanvas.getContext('2d');
+        const huygensPlayPause = document.getElementById('huygensPlayPause');
+        const huygensSpeedSlider = document.getElementById('huygensSpeed');
+        const huygensSlitWidthSlider = document.getElementById('huygensSlitWidth');
+        const huygensSlitWidthValue = document.getElementById('huygensSlitWidthValue');
+        const huygensShowSlitCheckbox = document.getElementById('huygensShowSlit');
+
+        let huygensWavefrontX = 10; // Starting X position of the plane wave
+        const huygensWavefrontYStart = 10;
+        const huygensWavefrontYEnd = huygensCanvas.height - 10;
+        const huygensNumSources = 20; // Number of wavelet sources on the wavefront
+        let huygensWaveletRadius = 0;
+        const huygensMaxWaveletRadius = 25; // Distance wave travels per 'step'
+        let huygensAnimationId = null;
+        let huygensIsPlaying = true;
+
+        function drawHuygensEnhanced() {
+            const width = huygensCanvas.width;
+            const height = huygensCanvas.height;
+            const speed = parseFloat(huygensSpeedSlider.value);
+            const showSlit = huygensShowSlitCheckbox.checked;
+            const slitWidth = parseInt(huygensSlitWidthSlider.value);
+            const slitX = width / 2;
+            const slitY1 = (height - slitWidth) / 2;
+            const slitY2 = (height + slitWidth) / 2;
+
+            huygensSlitWidthValue.textContent = slitWidth;
+
+            huygensCtx.clearRect(0, 0, width, height);
+
+            // --- Draw Barrier/Slit (Optional) ---
+            if (showSlit) {
+                huygensCtx.fillStyle = '#666';
+                // Top part of barrier
+                huygensCtx.fillRect(slitX - 5, 0, 10, slitY1);
+                // Bottom part of barrier
+                huygensCtx.fillRect(slitX - 5, slitY2, 10, height - slitY2);
+            }
+
+            // --- Draw Wavefront and Wavelets ---
+            const sources = [];
+            for (let i = 0; i <= huygensNumSources; i++) {
+                const y = huygensWavefrontYStart + (i / huygensNumSources) * (huygensWavefrontYEnd - huygensWavefrontYStart);
+                let currentX = huygensWavefrontX;
+
+                // Check if this point is blocked by the slit barrier BEFORE it reaches the slit
+                 if (showSlit && currentX < slitX && (y < slitY1 || y > slitY2)) {
+                     continue; // Don't draw source if blocked before slit
+                 }
+                 // Check if this point is blocked AFTER passing the slit x-position
+                 if (showSlit && currentX >= slitX && (y < slitY1 || y > slitY2)) {
+                     continue; // Stop propagation if hits barrier
+                 }
+
+                 sources.push({ x: currentX, y: y });
+
+                // Draw wavelet source point on the wavefront
+                huygensCtx.fillStyle = 'blue';
+                huygensCtx.beginPath();
+                huygensCtx.arc(currentX, y, 2, 0, 2 * Math.PI);
+                huygensCtx.fill();
+
+                // Draw expanding wavelet
+                huygensCtx.strokeStyle = 'rgba(0, 180, 255, 0.4)';
+                huygensCtx.lineWidth = 1;
+                huygensCtx.beginPath();
+                huygensCtx.arc(currentX, y, huygensWaveletRadius, 0, 2 * Math.PI);
+                huygensCtx.stroke();
+            }
+
+             // --- Draw the "Envelope" (Next Wavefront approximation) ---
+             if (sources.length > 1) {
+                 huygensCtx.strokeStyle = 'blue';
+                 huygensCtx.lineWidth = 2.5;
+                 huygensCtx.beginPath();
+                 // For plane wave, the envelope is simply shifted forward
+                 let envelopeX = huygensWavefrontX + huygensWaveletRadius;
+
+                 // Adjust envelope drawing if passing through slit
+                 let firstSourceY = -1, lastSourceY = -1;
+                 if (showSlit && envelopeX > slitX) {
+                     for(const src of sources) {
+                         if (src.y >= slitY1 && src.y <= slitY2) {
+                             if (firstSourceY < 0) firstSourceY = src.y;
+                             lastSourceY = src.y;
+                         }
+                     }
+                 } else {
+                     firstSourceY = sources[0].y;
+                     lastSourceY = sources[sources.length - 1].y;
+                 }
+
+                 if (firstSourceY >= 0) {
+                     // Draw envelope based on actual propagating sources
+                     huygensCtx.moveTo(envelopeX, firstSourceY);
+                     huygensCtx.lineTo(envelopeX, lastSourceY);
+
+                     // Simple diffraction spread approximation after slit
+                     if (showSlit && envelopeX > slitX + huygensMaxWaveletRadius) {
+                        const spreadFactor = huygensMaxWaveletRadius / slitWidth; // Larger spread for smaller slit
+                        const angle = Math.atan(spreadFactor * 0.5); // Approximate spread angle
+                        const centerSlitY = (slitY1 + slitY2) / 2;
+                        const distPastSlit = envelopeX - slitX;
+
+                        // Draw diverging lines (very simplified diffraction)
+                        huygensCtx.lineTo(slitX + distPastSlit / Math.cos(angle), centerSlitY + distPastSlit * Math.tan(angle));
+                        huygensCtx.moveTo(envelopeX, firstSourceY); // Go back to start point
+                        huygensCtx.lineTo(slitX + distPastSlit / Math.cos(angle), centerSlitY - distPastSlit * Math.tan(angle));
+
+                     } else {
+                         // Straight line before significant diffraction or if no slit
+                          huygensCtx.lineTo(envelopeX, lastSourceY);
+                     }
+
+
+                 }
+                 huygensCtx.stroke();
+
+             }
+
+
+            // --- Update Animation State ---
+            huygensWaveletRadius += speed;
+            if (huygensWaveletRadius >= huygensMaxWaveletRadius) {
+                huygensWavefrontX += huygensMaxWaveletRadius; // Move wavefront forward
+                huygensWaveletRadius = 0; // Reset wavelets
+
+                // Reset wave if it goes off screen
+                if (huygensWavefrontX > width + huygensMaxWaveletRadius) {
+                    huygensWavefrontX = 10;
+                }
+            }
+
+            // --- Loop Animation ---
+            if (huygensIsPlaying) {
+                huygensAnimationId = requestAnimationFrame(drawHuygensEnhanced);
+            }
+        }
+
+        // --- Controls ---
+        huygensPlayPause.addEventListener('click', () => {
+            huygensIsPlaying = !huygensIsPlaying;
+            huygensPlayPause.textContent = huygensIsPlaying ? 'Pause' : 'Play';
+            if (huygensIsPlaying && huygensAnimationId === null) {
+                huygensAnimationId = requestAnimationFrame(drawHuygensEnhanced);
+            } else if (!huygensIsPlaying && huygensAnimationId !== null) {
+                cancelAnimationFrame(huygensAnimationId);
+                huygensAnimationId = null;
+            }
+        });
+
+        // Make sliders update drawing without needing play/pause cycle
+        huygensSpeedSlider.addEventListener('input', () => { if (!huygensIsPlaying) drawHuygensEnhanced(); });
+        huygensSlitWidthSlider.addEventListener('input', () => { if (!huygensIsPlaying) drawHuygensEnhanced(); });
+        huygensShowSlitCheckbox.addEventListener('change', () => { if (!huygensIsPlaying) drawHuygensEnhanced(); });
+
+
+        // Start the animation
+        huygensAnimationId = requestAnimationFrame(drawHuygensEnhanced);
+
+
+        // --- 9.5 Young's Double Slit ---
+        const doubleSlitCanvas = document.getElementById('doubleSlitCanvas');
+        const doubleSlitCtx = doubleSlitCanvas.getContext('2d');
+        const doubleSlitLambdaSlider = document.getElementById('doubleSlitLambdaSlider');
+        const doubleSlitDSlider = document.getElementById('doubleSlitDSlider');
+        const doubleSlitLambdaValue = document.getElementById('doubleSlitLambdaValue');
+        const doubleSlitDValue = document.getElementById('doubleSlitDValue');
+
+        function drawDoubleSlitPattern() {
+            const width = doubleSlitCanvas.width;
+            const height = doubleSlitCanvas.height;
+            const lambda = parseInt(doubleSlitLambdaSlider.value) * 1e-9; // wavelength in m
+            const d = parseFloat(doubleSlitDSlider.value) * 1e-3; // slit separation in m
+            const L = 1.0; // Assume screen distance L = 1m for simplicity
+            const scale = width / 0.05; // Scale: map +/- 2.5cm range to canvas width
+
+            doubleSlitLambdaValue.textContent = doubleSlitLambdaSlider.value;
+            doubleSlitDValue.textContent = doubleSlitDSlider.value;
+
+            doubleSlitCtx.clearRect(0, 0, width, height);
+
+             // Intensity calculation (approximate using cos^2 term)
+             function getIntensity(x_screen) {
+                const theta = Math.atan(x_screen / L); // Angle
+                if (d === 0) return 1.0; // Avoid division by zero
+                const phaseDifference = (2 * Math.PI * d * Math.sin(theta)) / lambda;
+                // Interference term: cos^2(phaseDifference / 2)
+                // We also need a single-slit diffraction envelope, but let's ignore it for simplicity
+                const intensity = Math.pow(Math.cos(phaseDifference / 2), 2);
+                return intensity;
+             }
+
+             // Draw the intensity pattern
+             doubleSlitCtx.beginPath();
+             doubleSlitCtx.moveTo(0, height);
+             for (let i = 0; i < width; i++) {
+                 const x_canvas = i;
+                 // Convert canvas x to screen position y (relative to center)
+                 const x_screen = (x_canvas - width / 2) / scale;
+                 const intensity = getIntensity(x_screen);
+                 const y_canvas = height - intensity * (height - 10); // Leave margin at top
+                 doubleSlitCtx.lineTo(x_canvas, y_canvas);
+             }
+             // Fill the pattern area
+             doubleSlitCtx.lineTo(width, height);
+             doubleSlitCtx.closePath();
+
+            // Create gradient based on wavelength
+            const color = wavelengthToColor(parseInt(doubleSlitLambdaSlider.value));
+            doubleSlitCtx.fillStyle = color;
+            doubleSlitCtx.fill();
+
+            // Draw center line
+            doubleSlitCtx.strokeStyle = '#aaa';
+            doubleSlitCtx.lineWidth = 1;
+            doubleSlitCtx.beginPath();
+            doubleSlitCtx.moveTo(width/2, 0);
+            doubleSlitCtx.lineTo(width/2, height);
+            doubleSlitCtx.stroke();
+        }
+
+        // Helper to get color from wavelength
+        function wavelengthToColor(nm) {
+            if (nm >= 380 && nm < 440) return `rgba(148, 0, 211, 0.7)`; // Violet
+            else if (nm >= 440 && nm < 495) return `rgba(0, 0, 255, 0.7)`;    // Blue
+            else if (nm >= 495 && nm < 570) return `rgba(0, 255, 0, 0.7)`;    // Green
+            else if (nm >= 570 && nm < 590) return `rgba(255, 255, 0, 0.7)`;  // Yellow
+            else if (nm >= 590 && nm < 620) return `rgba(255, 165, 0, 0.7)`; // Orange
+            else if (nm >= 620 && nm <= 750) return `rgba(255, 0, 0, 0.7)`;   // Red
+            else return `rgba(128, 128, 128, 0.7)`; // Gray for outside visible
+        }
+
+
+        doubleSlitLambdaSlider.addEventListener('input', drawDoubleSlitPattern);
+        doubleSlitDSlider.addEventListener('input', drawDoubleSlitPattern);
+        drawDoubleSlitPattern();
+
+       // --- 10.1 Enhanced Thin Films ---
+       const thinFilmCanvas = document.getElementById('thinFilmCanvas');
+       const thinFilmCtx = thinFilmCanvas.getContext('2d');
+       const filmThicknessSlider = document.getElementById('filmThicknessSlider');
+       const filmIndexSlider = document.getElementById('filmIndexSlider');
+       const substrateIndexSlider = document.getElementById('substrateIndexSlider'); // Added substrate slider
+       const filmThicknessValue = document.getElementById('filmThicknessValue');
+       const filmIndexValue = document.getElementById('filmIndexValue');
+       const substrateIndexValue = document.getElementById('substrateIndexValue'); // Added substrate value display
+       const reflectedColorBox = document.getElementById('reflectedColorBox');
+       const interferenceText = document.getElementById('interferenceText');
+
+       // Representative wavelengths for RGB
+       const lambda_R = 650; // Red
+       const lambda_G = 550; // Green
+       const lambda_B = 450; // Blue
+
+       function calculateThinFilmInterference(t_nm, n_inc, n_film, n_sub, lambda_nm) {
+           // Phase shift at top surface (reflection 1)
+           const phaseShift1_lambda = (n_film > n_inc) ? 0.5 : 0; // Phase shift in units of lambda
+
+           // Phase shift at bottom surface (reflection 2)
+           const phaseShift2_lambda = (n_sub > n_film) ? 0.5 : 0;
+
+           // Optical path difference inside film (normal incidence)
+           const pathDifference_nm = 2 * n_film * t_nm;
+           const pathDifference_lambda = pathDifference_nm / lambda_nm;
+
+           // Total phase difference between the two reflected waves (in units of lambda)
+           const totalPhaseDifference_lambda = pathDifference_lambda + (phaseShift1_lambda - phaseShift2_lambda);
+
+           // Calculate reflected intensity (amplitude squared). Using cos^2 model based on phase difference.
+           // cos(PI * difference) ranges from -1 to 1. Squaring gives 0 to 1.
+           // Phase difference of integer -> cos(n*PI) = +/-1 -> cos^2 = 1 (Constructive)
+           // Phase difference of half-integer -> cos((n+0.5)*PI) = 0 -> cos^2 = 0 (Destructive)
+           const reflectedAmplitude = Math.cos(Math.PI * totalPhaseDifference_lambda);
+           const reflectedIntensity = Math.pow(reflectedAmplitude, 2);
+
+           return {
+               intensity: reflectedIntensity,
+               phaseShift1: phaseShift1_lambda > 0,
+               phaseShift2: phaseShift2_lambda > 0,
+               pathDiff_nm: pathDifference_nm
+           };
+       }
+
+       function getInterferenceDescription(intensity) {
+           if (intensity > 0.9) return "Strongly Constructive";
+           if (intensity > 0.6) return "Constructive";
+           if (intensity < 0.1) return "Destructive";
+           if (intensity < 0.4) return "Mostly Destructive";
+           return "Intermediate";
+       }
+
+
+       function drawThinFilmEnhanced() {
+           const width = thinFilmCanvas.width;
+           const height = thinFilmCanvas.height;
+           const t_nm = parseInt(filmThicknessSlider.value);
+           const n_inc = 1.0; // Assuming Air
+           const n_film = parseFloat(filmIndexSlider.value);
+           const n_sub = parseFloat(substrateIndexSlider.value); // Use slider value
+
+           filmThicknessValue.textContent = t_nm;
+           filmIndexValue.textContent = n_film.toFixed(2);
+           substrateIndexValue.textContent = n_sub.toFixed(2); // Update substrate display
+
+           thinFilmCtx.clearRect(0, 0, width, height);
+
+           // --- Calculate RGB Interference ---
+           const resultR = calculateThinFilmInterference(t_nm, n_inc, n_film, n_sub, lambda_R);
+           const resultG = calculateThinFilmInterference(t_nm, n_inc, n_film, n_sub, lambda_G);
+           const resultB = calculateThinFilmInterference(t_nm, n_inc, n_film, n_sub, lambda_B);
+
+           // Combine results for final color (scale intensity 0-1 to color value 0-255)
+           const colorR = Math.round(resultR.intensity * 255);
+           const colorG = Math.round(resultG.intensity * 255);
+           const colorB = Math.round(resultB.intensity * 255);
+           const reflectedColor = `rgb(${colorR}, ${colorG}, ${colorB})`;
+
+           // Update color box and text description
+           reflectedColorBox.style.backgroundColor = reflectedColor;
+           interferenceText.innerHTML = `
+                Red (${lambda_R}nm): ${getInterferenceDescription(resultR.intensity)}<br>
+                Green (${lambda_G}nm): ${getInterferenceDescription(resultG.intensity)}<br>
+                Blue (${lambda_B}nm): ${getInterferenceDescription(resultB.intensity)}
+           `;
+
+           // --- Draw Visual Diagram ---
+           const airHeight = height * 0.2;
+           const filmHeightRatio = 0.6; // Visual thickness ratio
+           const filmHeight = height * filmHeightRatio;
+           const subHeight = height * (1.0 - 0.2 - filmHeightRatio);
+           const filmTopY = airHeight;
+           const filmBottomY = airHeight + filmHeight;
+
+           // Draw layers
+           thinFilmCtx.fillStyle = 'rgba(173, 216, 230, 0.1)'; // Air
+           thinFilmCtx.fillRect(0, 0, width, airHeight);
+           thinFilmCtx.fillStyle = `rgba(200, 200, ${150 + n_film * 40}, 0.3)`; // Film color slightly depends on n
+           thinFilmCtx.fillRect(0, filmTopY, width, filmHeight);
+           thinFilmCtx.fillStyle = `rgba(${150 + n_sub * 10}, 160, 160, 0.4)`; // Substrate color slightly depends on n
+           thinFilmCtx.fillRect(0, filmBottomY, width, subHeight);
+
+           thinFilmCtx.fillStyle = '#000';
+           thinFilmCtx.textAlign = 'left';
+           thinFilmCtx.fillText(`Incident (n=${n_inc.toFixed(2)})`, 10, airHeight / 2 + 5);
+           thinFilmCtx.fillText(`Film (n=${n_film.toFixed(2)}, t=${t_nm}nm)`, 10, filmTopY + filmHeight / 2);
+           thinFilmCtx.fillText(`Substrate (n=${n_sub.toFixed(2)})`, 10, filmBottomY + subHeight / 2 + 5);
+
+           // Draw simplified rays (normal incidence, slightly angled for visibility)
+           const rayStartX = width * 0.4;
+           const rayAngle = 0.15; // Slight angle for visual separation
+           const dx = Math.sin(rayAngle);
+           const dy = Math.cos(rayAngle); // Should be close to 1 for small angles
+
+           // Incident ray
+           thinFilmCtx.strokeStyle = 'black';
+           thinFilmCtx.lineWidth = 1.5;
+           thinFilmCtx.beginPath();
+           thinFilmCtx.moveTo(rayStartX - airHeight * dx, 0);
+           thinFilmCtx.lineTo(rayStartX, filmTopY);
+           thinFilmCtx.stroke();
+           thinFilmCtx.fillText("Incident Ray", rayStartX - airHeight * dx - 10 , 20);
+
+           // Reflected ray 1 (R1) - from top surface
+           const r1EndX = rayStartX - airHeight * dx;
+           const r1EndY = 0;
+           thinFilmCtx.strokeStyle = 'red';
+           thinFilmCtx.beginPath();
+           thinFilmCtx.moveTo(rayStartX, filmTopY);
+           thinFilmCtx.lineTo(r1EndX, r1EndY);
+           thinFilmCtx.stroke();
+           thinFilmCtx.fillStyle = 'red';
+           thinFilmCtx.fillText("R1", r1EndX - 15, r1EndY + 15);
+           if (resultR.phaseShift1) { // Use R result, shifts are same for all wavelengths
+               thinFilmCtx.fillText("180° shift", rayStartX - 50, filmTopY - 5);
+           }
+
+           // Ray inside film (down)
+           const insideFilmX1 = rayStartX + filmHeight * dx / n_film; // Angle changes slightly inside
+           thinFilmCtx.strokeStyle = 'gray';
+           thinFilmCtx.setLineDash([3, 3]);
+           thinFilmCtx.beginPath();
+           thinFilmCtx.moveTo(rayStartX, filmTopY);
+           thinFilmCtx.lineTo(insideFilmX1, filmBottomY);
+           thinFilmCtx.stroke();
+
+           // Ray inside film (up) - reflected from bottom
+           const insideFilmX2 = insideFilmX1 - filmHeight * dx / n_film;
+           thinFilmCtx.beginPath();
+           thinFilmCtx.moveTo(insideFilmX1, filmBottomY);
+           thinFilmCtx.lineTo(insideFilmX2, filmTopY);
+           thinFilmCtx.stroke();
+           thinFilmCtx.setLineDash([]); // Reset dash
+
+            // Add Path difference label
+            thinFilmCtx.fillStyle = 'purple';
+            thinFilmCtx.fillText(`Optical Path Diff ≈ 2nt = ${resultR.pathDiff_nm.toFixed(0)} nm`, insideFilmX1 + 10, filmTopY + filmHeight / 2 );
+
+           // Phase shift at bottom reflection label
+           if (resultR.phaseShift2) {
+               thinFilmCtx.fillText("180° shift", insideFilmX1 + 5, filmBottomY + 15);
+           }
+
+
+           // Reflected ray 2 (R2) - exiting film
+           const r2StartX = insideFilmX2; // Where internal reflected ray hits top surface
+           const r2EndX = r2StartX + airHeight * dx; // Exits parallel to R1
+           const r2EndY = 0;
+           thinFilmCtx.strokeStyle = 'blue';
+           thinFilmCtx.beginPath();
+           thinFilmCtx.moveTo(r2StartX, filmTopY);
+           thinFilmCtx.lineTo(r2EndX, r2EndY);
+           thinFilmCtx.stroke();
+           thinFilmCtx.fillStyle = 'blue';
+           thinFilmCtx.fillText("R2", r2EndX + 5, r2EndY + 15);
+
+            // Combined Reflection Arrow
+            thinFilmCtx.strokeStyle = reflectedColor; // Use the calculated color!
+            thinFilmCtx.lineWidth = 4; // Make it thick
+            thinFilmCtx.beginPath();
+            const combinedX = (r1EndX + r2EndX)/2 + 40; // Position it slightly away
+            thinFilmCtx.moveTo(combinedX, filmTopY - 10);
+            thinFilmCtx.lineTo(combinedX, 10);
+             // Arrowhead
+             thinFilmCtx.lineTo(combinedX - 5, 15);
+             thinFilmCtx.moveTo(combinedX, 10);
+             thinFilmCtx.lineTo(combinedX + 5, 15);
+            thinFilmCtx.stroke();
+            thinFilmCtx.fillStyle = '#000';
+            thinFilmCtx.fillText("Combined Reflection", combinedX - 40, filmTopY + 5);
+
+
+       }
+
+       // Event listeners
+       filmThicknessSlider.addEventListener('input', drawThinFilmEnhanced);
+       filmIndexSlider.addEventListener('input', drawThinFilmEnhanced);
+       substrateIndexSlider.addEventListener('input', drawThinFilmEnhanced); // Add listener for substrate
+       drawThinFilmEnhanced(); // Initial draw
+
+
+         // --- 10.2 Single Slit Diffraction ---
+         const singleSlitCanvas = document.getElementById('singleSlitCanvas');
+         const singleSlitCtx = singleSlitCanvas.getContext('2d');
+         const singleSlitLambdaSlider = document.getElementById('singleSlitLambdaSlider');
+         const singleSlitWidthSlider = document.getElementById('singleSlitWidthSlider');
+         const singleSlitLambdaValue = document.getElementById('singleSlitLambdaValue');
+         const singleSlitWidthValue = document.getElementById('singleSlitWidthValue');
+
+         function drawSingleSlitPattern() {
+             const width = singleSlitCanvas.width;
+             const height = singleSlitCanvas.height;
+             const lambda = parseInt(singleSlitLambdaSlider.value) * 1e-9; // m
+             const w = parseFloat(singleSlitWidthSlider.value) * 1e-3; // m
+             const L = 1.0; // Screen distance = 1m
+             const scale = width / 0.1; // Map +/- 5cm to canvas width
+
+             singleSlitLambdaValue.textContent = singleSlitLambdaSlider.value;
+             singleSlitWidthValue.textContent = singleSlitWidthSlider.value;
+
+             singleSlitCtx.clearRect(0, 0, width, height);
+
+              // Intensity calculation: I = I_0 * [sin(beta)/beta]^2, where beta = (pi * w * sin(theta)) / lambda
+              function getSingleSlitIntensity(x_screen) {
+                 const theta = Math.atan(x_screen / L);
+                 if (w === 0 || lambda === 0) return 1.0;
+                 const sin_theta = Math.sin(theta);
+                 // Avoid division by zero if sin_theta is zero (center point)
+                 if (Math.abs(sin_theta) < 1e-9) return 1.0;
+
+                 const beta = (Math.PI * w * sin_theta) / lambda;
+                 const sinc = Math.sin(beta) / beta;
+                 const intensity = Math.pow(sinc, 2);
+                 return intensity;
+              }
+
+              // Draw the intensity pattern
+              singleSlitCtx.beginPath();
+              singleSlitCtx.moveTo(0, height);
+              for (let i = 0; i < width; i++) {
+                  const x_canvas = i;
+                  const x_screen = (x_canvas - width / 2) / scale;
+                  const intensity = getSingleSlitIntensity(x_screen);
+                  const y_canvas = height - intensity * (height - 10);
+                  singleSlitCtx.lineTo(x_canvas, y_canvas);
+              }
+              singleSlitCtx.lineTo(width, height);
+              singleSlitCtx.closePath();
+
+             const color = wavelengthToColor(parseInt(singleSlitLambdaSlider.value));
+             singleSlitCtx.fillStyle = color;
+             singleSlitCtx.fill();
+
+             // Draw center line
+             singleSlitCtx.strokeStyle = '#aaa';
+             singleSlitCtx.lineWidth = 1;
+             singleSlitCtx.beginPath();
+             singleSlitCtx.moveTo(width/2, 0);
+             singleSlitCtx.lineTo(width/2, height);
+             singleSlitCtx.stroke();
+         }
+
+         singleSlitLambdaSlider.addEventListener('input', drawSingleSlitPattern);
+         singleSlitWidthSlider.addEventListener('input', drawSingleSlitPattern);
+         drawSingleSlitPattern();
+
+
+         // --- 10.3 Diffraction Grating ---
+         const gratingCanvas = document.getElementById('gratingCanvas');
+         const gratingCtx = gratingCanvas.getContext('2d');
+         const gratingLambdaSlider = document.getElementById('gratingLambdaSlider');
+         const gratingDSlider = document.getElementById('gratingDSlider');
+         const gratingLambdaValue = document.getElementById('gratingLambdaValue');
+         const gratingDValue = document.getElementById('gratingDValue');
+
+         function drawGratingPattern() {
+             const width = gratingCanvas.width;
+             const height = gratingCanvas.height;
+             const lambda = parseInt(gratingLambdaSlider.value) * 1e-9; // m
+             const d = parseInt(gratingDSlider.value) * 1e-9; // m (grating spacing)
+             const L = 1.0; // Screen distance = 1m
+             const max_angle_rad = Math.PI / 3; // Limit drawing range to +/- 60 degrees
+
+             gratingLambdaValue.textContent = gratingLambdaSlider.value;
+             gratingDValue.textContent = gratingDSlider.value;
+
+             gratingCtx.clearRect(0, 0, width, height);
+
+             const color = wavelengthToColor(parseInt(gratingLambdaSlider.value));
+             gratingCtx.fillStyle = color;
+             gratingCtx.strokeStyle = '#aaa';
+             gratingCtx.lineWidth = 1;
+
+             // Draw center line
+             gratingCtx.beginPath();
+             gratingCtx.moveTo(width / 2, 0);
+             gratingCtx.lineTo(width / 2, height);
+             gratingCtx.stroke();
+
+             // Calculate and draw positions of maxima (d sin(theta) = m * lambda)
+             let m = 0;
+             while (true) {
+                 const sin_theta = (m * lambda) / d;
+                 if (Math.abs(sin_theta) > Math.sin(max_angle_rad)) {
+                     break; // Stop if angle is too large
+                 }
+
+                 if (Math.abs(sin_theta) <= 1) {
+                     const theta = Math.asin(sin_theta);
+                     const x_screen = L * Math.tan(theta); // Use tan for screen position
+
+                     // Map screen position to canvas x coordinate (relative to center)
+                     // Let's map +/- L*tan(max_angle) to the canvas width
+                     const max_x_screen = L * Math.tan(max_angle_rad);
+                     const x_canvas = width / 2 + (x_screen / max_x_screen) * (width / 2);
+
+                      // Draw sharp peaks (simplified as vertical lines)
+                      if (x_canvas >= 0 && x_canvas <= width) {
+                         gratingCtx.beginPath();
+                         gratingCtx.moveTo(x_canvas, height);
+                         gratingCtx.lineTo(x_canvas, 10); // Draw line up to near top
+                         gratingCtx.lineWidth = 3; // Make lines visible
+                         gratingCtx.strokeStyle = color.replace('0.7', '1.0'); // Use solid color
+                         gratingCtx.stroke();
+                         gratingCtx.fillStyle = '#000';
+                         gratingCtx.fillText(`m=${m}`, x_canvas - 5, height - 5);
+                      }
+                 }
+
+                 if (m === 0) { m = 1; }
+                 else if (m > 0) { m = -m; } // Draw negative order
+                 else { m = -m + 1;} // Go to next positive order
+             }
+         }
+
+         gratingLambdaSlider.addEventListener('input', drawGratingPattern);
+         gratingDSlider.addEventListener('input', drawGratingPattern);
+         drawGratingPattern();
+
+
+         // --- 10.4 Electromagnetic Wave ---
+         const emWaveCanvas = document.getElementById('emWaveCanvas');
+         const emWaveCtx = emWaveCanvas.getContext('2d');
+         const animateEMWaveButton = document.getElementById('animateEMWaveButton');
+         const emWaveSpeedSlider = document.getElementById('emWaveSpeedSlider');
+         let emWavePhase = 0;
+         let emWaveAnimating = true;
+         let lastTime = 0;
+
+         function drawEMWave(timestamp) {
+             const width = emWaveCanvas.width;
+             const height = emWaveCanvas.height;
+             const centerY = height / 2;
+             const amplitude = height * 0.3;
+             const wavelength = width / 4; // Show ~4 wavelengths
+             const k = 2 * Math.PI / wavelength;
+             const speed = parseFloat(emWaveSpeedSlider.value);
+
+             if (!lastTime) lastTime = timestamp;
+             const deltaTime = timestamp - lastTime;
+             lastTime = timestamp;
+
+             emWaveCtx.clearRect(0, 0, width, height);
+
+             // Draw propagation axis
+             emWaveCtx.strokeStyle = '#aaa';
+             emWaveCtx.lineWidth = 1;
+             emWaveCtx.beginPath();
+             emWaveCtx.moveTo(0, centerY);
+             emWaveCtx.lineTo(width, centerY);
+             emWaveCtx.stroke();
+             emWaveCtx.fillStyle = '#000';
+             emWaveCtx.fillText("Direction of Propagation (x)", width - 150, centerY + 15);
+
+             // Draw Electric Field (E - oscillating vertically, Blue)
+             emWaveCtx.strokeStyle = 'blue';
+             emWaveCtx.lineWidth = 2;
+             emWaveCtx.beginPath();
+             emWaveCtx.moveTo(0, centerY);
+             for (let x = 0; x < width; x++) {
+                 const y = centerY + amplitude * Math.sin(k * x - emWavePhase);
+                 emWaveCtx.lineTo(x, y);
+             }
+             emWaveCtx.stroke();
+             emWaveCtx.fillStyle = 'blue';
+             emWaveCtx.fillText("E-Field (y)", 10, 20);
+
+
+             // Draw Magnetic Field (B - oscillating horizontally, Red)
+             // Simulate perspective for horizontal oscillation
+             emWaveCtx.strokeStyle = 'red';
+             emWaveCtx.lineWidth = 2;
+             emWaveCtx.beginPath();
+             emWaveCtx.moveTo(0, centerY);
+              for (let x = 0; x < width; x++) {
+                  // Cosine for 90deg phase diff, perspective scaling for 'z' axis
+                  const z_oscillation = amplitude * Math.cos(k * x - emWavePhase);
+                  const perspective_factor = 0.3; // How much perspective effect
+                  const y = centerY + z_oscillation * perspective_factor * Math.sin(k*x); // Simple perspective approx
+                  const lineWidthFactor = 1 + (z_oscillation / amplitude) * 0.5; // Thicker when 'closer'
+                  emWaveCtx.lineWidth = 2 * lineWidthFactor;
+                  emWaveCtx.lineTo(x, y); // Draw projected B field oscillation
+                  emWaveCtx.stroke(); // Stroke segment by segment for varying line width
+                  emWaveCtx.beginPath();
+                  emWaveCtx.moveTo(x, y);
+              }
+             // Reset line width
+             emWaveCtx.lineWidth = 2;
+             emWaveCtx.fillStyle = 'red';
+             emWaveCtx.fillText("B-Field (z)", 10, 40);
+
+
+             if (emWaveAnimating) {
+                 emWavePhase += speed * (deltaTime / 16); // Adjust phase based on speed and time elapsed
+                 requestAnimationFrame(drawEMWave);
+             }
+         }
+
+         animateEMWaveButton.addEventListener('click', () => {
+            emWaveAnimating = !emWaveAnimating;
+            animateEMWaveButton.textContent = emWaveAnimating ? 'Pause' : 'Animate';
+            if (emWaveAnimating) {
+                lastTime = 0; // Reset time for smooth restart
+                requestAnimationFrame(drawEMWave);
+            }
+         });
+
+         requestAnimationFrame(drawEMWave); // Start animation
+
+
+         // --- 10.5 Polarization ---
+         const polarizationCanvas = document.getElementById('polarizationCanvas');
+         const polarizationCtx = polarizationCanvas.getContext('2d');
+         const analyzerAngleSlider = document.getElementById('analyzerAngleSlider');
+         const analyzerAngleValue = document.getElementById('analyzerAngleValue');
+         const malusResult = document.getElementById('malusResult');
+
+        function drawPolarization() {
+            const width = polarizationCanvas.width;
+            const height = polarizationCanvas.height;
+            const centerY = height / 2;
+            const sectionWidth = width / 4;
+            const analyzerAngleDeg = parseInt(analyzerAngleSlider.value);
+            const analyzerAngleRad = degreesToRadians(analyzerAngleDeg);
+
+            analyzerAngleValue.textContent = analyzerAngleDeg;
+
+            polarizationCtx.clearRect(0, 0, width, height);
+
+             // 1. Unpolarized Light (Left Section)
+             polarizationCtx.strokeStyle = '#888';
+             polarizationCtx.lineWidth = 1;
+             const rayY = centerY;
+             polarizationCtx.beginPath();
+             polarizationCtx.moveTo(0, rayY);
+             polarizationCtx.lineTo(sectionWidth * 1.5, rayY); // Ray line
+             polarizationCtx.stroke();
+
+             // Draw 'starburst' for unpolarized
+             const originX = sectionWidth * 0.5;
+             const numLines = 12;
+             const lineLength = 20;
+             for (let i = 0; i < numLines; i++) {
+                 const angle = (i / numLines) * Math.PI; // Only need 180 degrees coverage
+                 polarizationCtx.beginPath();
+                 polarizationCtx.moveTo(originX - lineLength * Math.cos(angle), rayY - lineLength * Math.sin(angle));
+                 polarizationCtx.lineTo(originX + lineLength * Math.cos(angle), rayY + lineLength * Math.sin(angle));
+                 polarizationCtx.stroke();
+             }
+             polarizationCtx.fillStyle = '#000';
+             polarizationCtx.fillText("Unpolarized", sectionWidth * 0.5 - 30, height - 10);
+
+
+             // 2. First Polarizer (Vertical)
+             const polarizerX = sectionWidth * 1.5;
+             polarizationCtx.fillStyle = 'rgba(100, 100, 100, 0.7)';
+             polarizationCtx.fillRect(polarizerX - 10, 10, 20, height - 20); // Polarizer rectangle
+             // Draw vertical transmission lines
+             polarizationCtx.strokeStyle = '#fff';
+             polarizationCtx.lineWidth = 1;
+             for(let y = 15; y < height - 15; y += 5) {
+                 polarizationCtx.beginPath();
+                 polarizationCtx.moveTo(polarizerX, y);
+                 polarizationCtx.lineTo(polarizerX, y + 3);
+                 polarizationCtx.stroke();
+             }
+             polarizationCtx.fillStyle = '#000';
+             polarizationCtx.fillText("Polarizer (Vertical)", polarizerX - 40, height - 10);
+
+
+              // 3. Polarized Light (Middle Section)
+              polarizationCtx.strokeStyle = '#888';
+              polarizationCtx.lineWidth = 1;
+              polarizationCtx.beginPath();
+              polarizationCtx.moveTo(polarizerX + 10, rayY);
+              polarizationCtx.lineTo(sectionWidth * 2.5, rayY); // Ray line
+              polarizationCtx.stroke();
+
+              // Draw vertical lines for vertically polarized light
+              const polarizedX = sectionWidth * 2.0;
+              polarizationCtx.strokeStyle = 'blue';
+              polarizationCtx.lineWidth = 2;
+               polarizationCtx.beginPath();
+               polarizationCtx.moveTo(polarizedX, rayY - lineLength);
+               polarizationCtx.lineTo(polarizedX, rayY + lineLength);
+               polarizationCtx.stroke();
+               polarizationCtx.fillStyle = '#000';
+               polarizationCtx.fillText("Vertically Polarized", polarizedX - 50, height - 10);
+
+              // 4. Analyzer
+              const analyzerX = sectionWidth * 2.5;
+              polarizationCtx.save(); // Save context state
+              polarizationCtx.translate(analyzerX, centerY); // Move origin to analyzer center
+              polarizationCtx.rotate(analyzerAngleRad); // Rotate the context
+              polarizationCtx.fillStyle = 'rgba(100, 100, 100, 0.7)';
+              polarizationCtx.fillRect(-10, -centerY + 10, 20, height - 20); // Analyzer rectangle (rotated)
+              // Draw transmission lines aligned with analyzer angle
+               polarizationCtx.strokeStyle = '#fff';
+               polarizationCtx.lineWidth = 1;
+               for(let y = -centerY + 15; y < centerY - 15; y += 5) {
+                  polarizationCtx.beginPath();
+                  polarizationCtx.moveTo(0, y);
+                  polarizationCtx.lineTo(0, y + 3);
+                  polarizationCtx.stroke();
+               }
+               polarizationCtx.restore(); // Restore context state
+               polarizationCtx.fillStyle = '#000';
+               polarizationCtx.fillText(`Analyzer (${analyzerAngleDeg}°)`, analyzerX - 30, height - 10);
+
+               // 5. Output Light (Right Section) & Malus's Law
+               const I0 = 1.0; // Assume initial polarized intensity is 1.0
+               const I = I0 * Math.pow(Math.cos(analyzerAngleRad), 2);
+
+               polarizationCtx.strokeStyle = '#888';
+               polarizationCtx.lineWidth = 1;
+               polarizationCtx.beginPath();
+               polarizationCtx.moveTo(analyzerX + 10, rayY);
+               polarizationCtx.lineTo(width, rayY); // Ray line
+               polarizationCtx.stroke();
+
+               // Draw output oscillation, scaled by sqrt(I) and rotated by analyzer angle
+               const outputX = sectionWidth * 3.25;
+               const outputAmplitude = lineLength * Math.sqrt(I);
+               if (outputAmplitude > 1) { // Draw only if significant intensity
+                    polarizationCtx.strokeStyle = 'red';
+                    polarizationCtx.lineWidth = 2;
+                    polarizationCtx.beginPath();
+                    polarizationCtx.moveTo(outputX - outputAmplitude * Math.sin(analyzerAngleRad), rayY - outputAmplitude * Math.cos(analyzerAngleRad));
+                    polarizationCtx.lineTo(outputX + outputAmplitude * Math.sin(analyzerAngleRad), rayY + outputAmplitude * Math.cos(analyzerAngleRad));
+                    polarizationCtx.stroke();
+               }
+                polarizationCtx.fillStyle = '#000';
+                polarizationCtx.fillText("Output", outputX - 20, height - 10);
+
+                malusResult.textContent = `Output Intensity = I₀ * cos²(${analyzerAngleDeg}°) ≈ ${I.toFixed(2)} * I₀`;
+
+        }
+        analyzerAngleSlider.addEventListener('input', drawPolarization);
+        drawPolarization();
+
+
+        // --- Navigation Highlight (Keep from previous steps) ---
+        const sections = document.querySelectorAll('main > section'); // Target only direct children sections in main
+        const navLinks = document.querySelectorAll('nav a');
+        const headerHeight = document.querySelector('header').offsetHeight;
+        const navHeight = document.querySelector('nav').offsetHeight;
+        const stickyOffset = headerHeight + navHeight + 10; // Combined height + buffer
+
+        window.onscroll = () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - stickyOffset) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+             // Default to first link if nothing else is active near the top
+             if (current === '' && pageYOffset < sections[0].offsetTop - stickyOffset) {
+                current = sections[0].getAttribute('id');
+            }
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                // Handle cases where link href might be just '#' or empty
+                 const linkHref = link.getAttribute('href');
+                 if (linkHref && linkHref.startsWith('#') && linkHref.substring(1) === current) {
+                    link.classList.add('active');
+                }
+            });
+        };
+        // Trigger scroll once on load to set initial state
+        window.dispatchEvent(new Event('scroll'));
+
+
+        // --- Mock Quiz 1 Logic ---
+        const checkQuiz1Button = document.getElementById('check-quiz1');
+
+        checkQuiz1Button.addEventListener('click', () => {
+            const tolerance = 0.05; // 5% tolerance for numerical answers
+            const angleTolerance = 0.5; // degrees tolerance
+
+            // --- Question 1 ---
+            const q1_ans1_user = parseFloat(document.getElementById('quiz1-q1-ans1').value);
+            const q1_ans2_user = parseFloat(document.getElementById('quiz1-q1-ans2').value);
+            const q1_feedback1 = document.getElementById('quiz1-q1-feedback1');
+            const q1_feedback2 = document.getElementById('quiz1-q1-feedback2');
+            // Calculation: n1*sin(t1) = n2*sin(t2) => sin(t2) = (1.64/1.33)*sin(35.5 deg)
+            const q1_t1_rad = degreesToRadians(35.5);
+            const q1_sin_t2 = (1.64 / 1.33) * Math.sin(q1_t1_rad);
+            let q1_ans1_correct = NaN;
+            if(Math.abs(q1_sin_t2) <= 1) { // Check for TIR possibility (though unlikely here)
+                q1_ans1_correct = radiansToDegrees(Math.asin(q1_sin_t2));
+            }
+            const q1_ans2_correct = 35.5; // Principle of reversibility
+
+            checkAnswer(q1_ans1_user, q1_ans1_correct, q1_feedback1, angleTolerance, q1_ans1_correct.toFixed(1) + '°');
+            checkAnswer(q1_ans2_user, q1_ans2_correct, q1_feedback2, angleTolerance, q1_ans2_correct.toFixed(1) + '°');
+
+             // --- Question 2 ---
+             const q2_ans_user = parseFloat(document.getElementById('quiz1-q2-ans').value);
+             const q2_feedback = document.getElementById('quiz1-q2-feedback');
+             // Calculation: x = (m+1/2)λL/d for dark fringe. m=3 for 4th order.
+             // λ = 477e-9 m, d = 0.23e-3 m, L = 2.45 m, m = 3
+             const q2_lambda = 477e-9;
+             const q2_d = 0.23e-3;
+             const q2_L = 2.45;
+             const q2_m = 3;
+             const q2_ans_correct = (q2_m + 0.5) * q2_lambda * q2_L / q2_d;
+             checkAnswer(q2_ans_user, q2_ans_correct, q2_feedback, q2_ans_correct * tolerance, q2_ans_correct.toFixed(4) + ' m');
+
+             // --- Question 3 ---
+             const q3_ans_user = parseFloat(document.getElementById('quiz1-q3-ans').value);
+             const q3_feedback = document.getElementById('quiz1-q3-feedback');
+             // Calculation: First minimum at d sin(theta) = (0+1/2)λ. No minima if theta >= 90 (sin(theta)=1).
+             // So d >= λ/2, or d/λ >= 0.5
+             const q3_ans_correct = 0.5;
+             checkAnswer(q3_ans_user, q3_ans_correct, q3_feedback, tolerance, q3_ans_correct.toFixed(1));
+
+
+             // --- Question 4 ---
+             const q4_ans_user = parseFloat(document.getElementById('quiz1-q4-ans').value);
+             const q4_feedback = document.getElementById('quiz1-q4-feedback');
+             // Calculation: x_m = (m+1/2)λL/d. We need x_4 - x_0
+             // x_4 = (4+0.5)λL/d, x_0 = (0+0.5)λL/d
+             // Separation = x_4 - x_0 = (4.5 - 0.5)λL/d = 4λL/d
+             const q4_lambda = 555e-9;
+             const q4_d = 0.067e-3;
+             const q4_L = 3.05;
+             const q4_ans_correct = 4 * q4_lambda * q4_L / q4_d;
+              checkAnswer(q4_ans_user, q4_ans_correct, q4_feedback, q4_ans_correct * tolerance, q4_ans_correct.toFixed(4) + ' m');
+
+        });
+
+        function checkAnswer(userAnswer, correctAnswer, feedbackElement, margin, correctString) {
+            feedbackElement.textContent = ''; // Clear previous feedback
+            feedbackElement.className = 'quiz-feedback'; // Reset classes
+
+            if (isNaN(userAnswer)) {
+                feedbackElement.textContent = 'Please enter a number.';
+                feedbackElement.classList.add('feedback-incorrect');
+                return;
+            }
+
+            if (isNaN(correctAnswer)) { // Handle cases like TIR where calculation might fail
+                 feedbackElement.textContent = 'Calculation error for correct answer.';
+                 feedbackElement.classList.add('feedback-incorrect');
+                 return;
+            }
+
+
+            if (Math.abs(userAnswer - correctAnswer) <= margin) {
+                feedbackElement.textContent = 'Correct!';
+                feedbackElement.classList.add('feedback-correct');
+            } else {
+                feedbackElement.textContent = `Incorrect. Correct ≈ ${correctString}`;
+                feedbackElement.classList.add('feedback-incorrect');
+            }
+        }
+
+    </script>
+
+</body>
+</html>
