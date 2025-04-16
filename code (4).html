@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics 12: Gravitational, Electric & Magnetic Fields</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1, h2 {
+            color: #0056b3; /* Dark Blue */
+            text-align: center;
+            margin-bottom: 1em;
+        }
+         h2 {
+            color: #007bff; /* Brighter Blue */
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.3em;
+            margin-top: 1.5em;
+        }
+
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+
+        nav li {
+            margin: 5px;
+        }
+
+        nav a {
+            display: block;
+            padding: 10px 15px;
+            text-decoration: none;
+            color: #0056b3;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        nav a:hover, nav a.active {
+            background-color: #007bff;
+            color: #fff;
+            border-color: #0056b3;
+        }
+
+        .topic {
+            display: none; /* Hidden by default */
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            margin-top: 15px;
+            background-color: #fdfdfd;
+        }
+
+        .topic.active {
+            display: block; /* Show active topic */
+        }
+
+        .visualization-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 15px;
+            align-items: flex-start; /* Align items to the top */
+        }
+
+        canvas {
+            border: 1px solid #ccc;
+            background-color: #fff;
+            display: block; /* Remove extra space below canvas */
+        }
+
+        .controls {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .controls label {
+            display: block;
+            margin: 10px 0 5px 0;
+            font-weight: bold;
+        }
+
+        .controls input[type="range"] {
+            width: 100%;
+        }
+
+         .controls input[type="radio"], .controls input[type="checkbox"] {
+            margin-right: 5px;
+         }
+         .controls span { /* For displaying slider values */
+             font-family: monospace;
+             margin-left: 10px;
+             color: #0056b3;
+         }
+
+        .output {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 1.1em;
+            min-height: 40px; /* Ensure space even if empty */
+            word-wrap: break-word;
+        }
+
+        .formula {
+            font-style: italic;
+            color: #555;
+            margin: 10px 0;
+        }
+
+        .description {
+            margin-bottom: 15px;
+        }
+
+         /* Specific styles for visualizations */
+         #canvasGravity, #canvasCoulomb, #canvasPotentialEnergy {
+            cursor: grab;
+         }
+         #canvasGravity:active, #canvasCoulomb:active, #canvasPotentialEnergy:active {
+            cursor: grabbing;
+         }
+
+         .vector-arrow {
+             stroke: red;
+             stroke-width: 2;
+             fill: red;
+         }
+         .field-line {
+             stroke: blue;
+             stroke-width: 1;
+         }
+         .equipotential-line {
+             stroke: green;
+             stroke-width: 1;
+             stroke-dasharray: 4, 2;
+         }
+          .charge-positive { fill: #dc3545; } /* Red */
+          .charge-negative { fill: #007bff; } /* Blue */
+          .mass { fill: #6c757d; } /* Gray */
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Physics 12: Gravitational, Electric & Magnetic Fields (Unit 3)</h1>
+        <p>Interactive visualizations for key concepts. Select a topic below:</p>
+
+        <nav>
+            <ul>
+                <li><a href="#day1" data-topic="day1">Day 1: Gravity</a></li>
+                <li><a href="#day2" data-topic="day2">Day 2: Orbits</a></li>
+                <li><a href="#day3" data-topic="day3">Day 3: Coulomb's Law</a></li>
+                <li><a href="#day4" data-topic="day4">Day 4: Electric Fields</a></li>
+                <li><a href="#day5" data-topic="day5">Day 5: Potential</a></li>
+                <li><a href="#day6" data-topic="day6">Day 6: Potential Energy</a></li>
+                <li><a href="#day7" data-topic="day7">Day 7: Electromagnets</a></li>
+                <li><a href="#day8" data-topic="day8">Day 8: Force on Moving Charge</a></li>
+                <li><a href="#day9" data-topic="day9">Day 9: Force on Wire</a></li>
+                <li><a href="#day10" data-topic="day10">Day 10: Circular Motion</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <!-- Day 1: Newtonian Gravitation -->
+            <div id="day1" class="topic">
+                <h2>Day 1: 6.1 Newtonian Gravitation (p 288)</h2>
+                <p class="description">Newton's Law of Universal Gravitation states that every particle attracts every other particle with a force proportional to the product of their masses and inversely proportional to the square of the distance between their centers.</p>
+                <p class="formula">F = G * (m₁ * m₂) / r²</p>
+                <div class="visualization-container">
+                    <canvas id="canvasGravity" width="400" height="200"></canvas>
+                    <div class="controls">
+                        <label for="mass1">Mass 1 (m₁): <span id="mass1Value">10</span> x10⁹ kg</label>
+                        <input type="range" id="mass1" min="1" max="100" value="10">
+                        <label for="mass2">Mass 2 (m₂): <span id="mass2Value">10</span> x10⁹ kg</label>
+                        <input type="range" id="mass2" min="1" max="100" value="10">
+                        <label for="distanceG">Distance (r): <span id="distanceGValue">100</span> m</label>
+                        <input type="range" id="distanceG" min="20" max="180" value="100">
+                    </div>
+                </div>
+                <div class="output" id="outputGravity">Force: ... N</div>
+            </div>
+
+            <!-- Day 2: Orbits -->
+            <div id="day2" class="topic">
+                <h2>Day 2: 6.2 Orbits (p 297)</h2>
+                <p class="description">For a stable circular orbit, the gravitational force provides the necessary centripetal force. This determines the required orbital speed for a given orbital radius around a central mass M.</p>
+                <p class="formula">v = √(G * M / r)</p>
+                <div class="visualization-container">
+                    <canvas id="canvasOrbit" width="300" height="300"></canvas>
+                    <div class="controls">
+                        <label for="centralMass">Central Mass (M): <span id="centralMassValue">6</span> x10²⁴ kg (Earth-like)</label>
+                        <input type="range" id="centralMass" min="1" max="10" value="6" step="0.1">
+                        <label for="orbitalRadius">Orbital Radius (r): <span id="orbitalRadiusValue">10</span> x10⁶ m</label>
+                        <input type="range" id="orbitalRadius" min="6.5" max="40" value="10" step="0.1"> <!-- Min radius slightly above Earth -->
+                    </div>
+                </div>
+                 <div class="output" id="outputOrbit">Orbital Speed: ... m/s</div>
+            </div>
+
+            <!-- Day 3: Coulomb's Law -->
+            <div id="day3" class="topic">
+                <h2>Day 3: 7.2 Coulomb's Law (p 327)</h2>
+                <p class="description">Coulomb's Law describes the electrostatic force between two charged particles. The force is proportional to the product of the charges and inversely proportional to the square of the distance between them. Like charges repel, opposite charges attract.</p>
+                <p class="formula">Fₑ = k * |q₁ * q₂| / r²</p>
+                 <div class="visualization-container">
+                    <canvas id="canvasCoulomb" width="400" height="200"></canvas>
+                    <div class="controls">
+                        <label for="charge1">Charge 1 (q₁): <span id="charge1Value">5</span> nC</label>
+                        <input type="range" id="charge1" min="-10" max="10" value="5" step="1">
+                        <label for="charge2">Charge 2 (q₂): <span id="charge2Value">-5</span> nC</label>
+                        <input type="range" id="charge2" min="-10" max="10" value="-5" step="1">
+                        <label for="distanceC">Distance (r): <span id="distanceCValue">5</span> cm</label>
+                        <input type="range" id="distanceC" min="1" max="15" value="5" step="0.5">
+                    </div>
+                </div>
+                 <div class="output" id="outputCoulomb">Force: ... N (...)</div>
+            </div>
+
+            <!-- Day 4: Electric Fields -->
+             <div id="day4" class="topic">
+                <h2>Day 4: 7.3 Electric Fields (p 334)</h2>
+                <p class="description">An electric field is a region around a charged object where another charge would experience a force. Field lines show the direction of the force on a positive test charge. Field strength (E) is force per unit charge.</p>
+                <p class="formula">E = k * |Q| / r² (Point Charge)</p>
+                <div class="visualization-container">
+                     <canvas id="canvasEField" width="300" height="300"></canvas>
+                     <div class="controls">
+                        <label>Field Type:</label>
+                        <label><input type="radio" name="fieldType" value="point" checked> Point Charge</label>
+                        <label><input type="radio" name="fieldType" value="plates"> Parallel Plates</label>
+                        <div id="pointChargeControlsE">
+                            <label for="sourceCharge">Source Charge (Q): <span id="sourceChargeValue">10</span> nC</label>
+                            <input type="range" id="sourceCharge" min="-20" max="20" value="10" step="1">
+                        </div>
+                         <div id="plateControlsE" style="display: none;">
+                            <label for="plateVoltage">Voltage (ΔV): <span id="plateVoltageValue">100</span> V</label>
+                            <input type="range" id="plateVoltage" min="-200" max="200" value="100" step="10">
+                             <label for="plateSeparation">Separation (d): <span id="plateSeparationValue">5</span> cm</label>
+                            <input type="range" id="plateSeparation" min="1" max="10" value="5" step="0.5">
+                        </div>
+                    </div>
+                </div>
+                <div class="output" id="outputEField">Field Strength at center: ... N/C</div>
+            </div>
+
+            <!-- Day 5: Potential Difference & Electrical Potential -->
+            <div id="day5" class="topic">
+                <h2>Day 5: 7.4 Potential Difference & Electrical Potential (p 346)</h2>
+                <p class="description">Electric potential (V) is the electric potential energy per unit charge at a point in an electric field. Potential difference (Voltage, ΔV) is the difference in electric potential between two points, representing the work done per unit charge to move a charge between those points.</p>
+                <p class="formula">V = k * Q / r (Point Charge); ΔV = Ed (Uniform Field)</p>
+                <div class="visualization-container">
+                     <canvas id="canvasPotential" width="300" height="300"></canvas>
+                     <div class="controls">
+                         <label>Field Type:</label>
+                        <label><input type="radio" name="potentialFieldType" value="point" checked> Point Charge</label>
+                        <label><input type="radio" name="potentialFieldType" value="plates"> Parallel Plates</label>
+                         <div id="pointChargeControlsV">
+                             <label for="sourceChargeV">Source Charge (Q): <span id="sourceChargeVValue">10</span> nC</label>
+                             <input type="range" id="sourceChargeV" min="-20" max="20" value="10" step="1">
+                         </div>
+                          <div id="plateControlsV" style="display: none;">
+                            <label for="plateVoltageV">Voltage (ΔV): <span id="plateVoltageVValue">100</span> V</label>
+                            <input type="range" id="plateVoltageV" min="-200" max="200" value="100" step="10">
+                             <label for="plateSeparationV">Separation (d): <span id="plateSeparationVValue">5</span> cm</label>
+                            <input type="range" id="plateSeparationV" min="1" max="10" value="5" step="0.5">
+                        </div>
+                         <p style="margin-top: 15px; font-style: italic;">(Drag the small circle on the canvas to see potential at that point)</p>
+                    </div>
+                </div>
+                 <div class="output" id="outputPotential">Potential at probe: ... V</div>
+            </div>
+
+            <!-- Day 6: Electrical Potential Energy -->
+            <div id="day6" class="topic">
+                 <h2>Day 6: 7.5 Electrical Potential & Potential Energy (p 355)</h2>
+                 <p class="description">Electrical potential energy (Eₚ) is the energy stored by a system of two or more charges due to their positions. It's related to the work done to assemble the charges.</p>
+                 <p class="formula">Eₚ = k * (q₁ * q₂) / r</p>
+                  <div class="visualization-container">
+                    <canvas id="canvasPotentialEnergy" width="400" height="200"></canvas>
+                    <div class="controls">
+                        <label for="charge1PE">Charge 1 (q₁): <span id="charge1PEValue">5</span> nC</label>
+                        <input type="range" id="charge1PE" min="-10" max="10" value="5" step="1">
+                        <label for="charge2PE">Charge 2 (q₂): <span id="charge2PEValue">-5</span> nC</label>
+                        <input type="range" id="charge2PE" min="-10" max="10" value="-5" step="1">
+                        <label for="distancePE">Distance (r): <span id="distancePEValue">5</span> cm</label>
+                        <input type="range" id="distancePE" min="1" max="15" value="5" step="0.5">
+                    </div>
+                </div>
+                 <div class="output" id="outputPotentialEnergy">Potential Energy: ... J</div>
+            </div>
+
+            <!-- Day 7: Magnets and Electromagnets -->
+             <div id="day7" class="topic">
+                <h2>Day 7: 8.1 Magnets and Electromagnets (p 378)</h2>
+                <p class="description">Moving electric charges (currents) create magnetic fields. The direction of the field around a straight wire can be found using the Right Hand Rule: point thumb in current direction, fingers curl in field direction.</p>
+                <p class="formula">B ∝ I / r</p>
+                <div class="visualization-container">
+                     <canvas id="canvasMagFieldWire" width="300" height="300"></canvas>
+                     <div class="controls">
+                         <label for="currentI">Current (I): <span id="currentIValue">5</span> A</label>
+                         <input type="range" id="currentI" min="-10" max="10" value="5" step="0.5">
+                         <p>(Positive current: Out of page / Up, Negative current: Into page / Down)</p>
+                         <p style="margin-top: 15px; font-style: italic;">View is looking down the wire (cross-section) or side-on depending on perspective.</p>
+                    </div>
+                </div>
+                 <div class="output" id="outputMagFieldWire">Field lines shown. Density indicates strength.</div>
+            </div>
+
+            <!-- Day 8: Magnetic Force on Moving Charges -->
+            <div id="day8" class="topic">
+                <h2>Day 8: 8.2 Magnetic Force on Moving Charges (p 386)</h2>
+                <p class="description">A charge moving through a magnetic field experiences a force (Lorentz force), unless moving parallel to the field. The direction is given by the Right Hand Rule (for positive charge): Fingers point in B direction, thumb in velocity (v) direction, force (F) is out of the palm.</p>
+                <p class="formula">F = q * v * B * sin(θ)</p>
+                 <div class="visualization-container">
+                    <canvas id="canvasMagForceCharge" width="400" height="300"></canvas>
+                    <div class="controls">
+                        <label for="chargeQ">Charge (q): <span id="chargeQValue">1</span> μC</label>
+                        <input type="range" id="chargeQ" min="-2" max="2" value="1" step="0.1">
+                         <label for="velocityX">Velocity (v): <span id="velocityXValue">1000</span> m/s (horizontal)</label>
+                        <input type="range" id="velocityX" min="100" max="2000" value="1000" step="100">
+                         <label for="magneticFieldB">Mag. Field (B): <span id="magneticFieldBValue">0.5</span> T (Into Page)</label>
+                        <input type="range" id="magneticFieldB" min="0" max="1" value="0.5" step="0.05">
+                        <label for="angleThetaCharge">Angle θ (between v and B): <span id="angleThetaChargeValue">90</span>°</label>
+                        <input type="range" id="angleThetaCharge" min="0" max="180" value="90" step="5">
+                         <p style="font-style: italic;">(Visualization assumes B is into/out of page, v is in plane, θ affects B component perpendicular to v)</p>
+                    </div>
+                </div>
+                 <div class="output" id="outputMagForceCharge">Force: ... N</div>
+            </div>
+
+            <!-- Day 9: Magnetic Force on a Current-Carrying Conductor -->
+             <div id="day9" class="topic">
+                <h2>Day 9: 8.3 Magnetic Force on a Current-Carrying Conductor (p 392)</h2>
+                <p class="description">A wire carrying current in a magnetic field experiences a force. This is the macroscopic result of the forces on individual moving charges within the wire. The direction follows a similar Right Hand Rule: Fingers (B), Thumb (I), Palm (F).</p>
+                <p class="formula">F = I * L * B * sin(θ)</p>
+                <div class="visualization-container">
+                    <canvas id="canvasMagForceWire" width="400" height="300"></canvas>
+                     <div class="controls">
+                        <label for="currentIW">Current (I): <span id="currentIWValue">2</span> A</label>
+                        <input type="range" id="currentIW" min="-5" max="5" value="2" step="0.2">
+                         <label for="wireLength">Length (L): <span id="wireLengthValue">0.5</span> m</label>
+                        <input type="range" id="wireLength" min="0.1" max="1" value="0.5" step="0.05">
+                         <label for="magneticFieldBW">Mag. Field (B): <span id="magneticFieldBWValue">0.5</span> T (Into Page)</label>
+                        <input type="range" id="magneticFieldBW" min="0" max="1" value="0.5" step="0.05">
+                        <label for="angleThetaWire">Angle θ (between I and B): <span id="angleThetaWireValue">90</span>°</label>
+                        <input type="range" id="angleThetaWire" min="0" max="180" value="90" step="5">
+                         <p style="font-style: italic;">(Visualization assumes B is into/out of page, I is in plane, θ affects B component perpendicular to I)</p>
+                    </div>
+                </div>
+                <div class="output" id="outputMagForceWire">Force: ... N</div>
+            </div>
+
+            <!-- Day 10: Motion of Charged Particles in Magnetic Fields -->
+             <div id="day10" class="topic">
+                 <h2>Day 10: 8.4 Motion of Charged Particles in Magnetic Fields (p 397)</h2>
+                 <p class="description">When a charged particle moves perpendicular to a uniform magnetic field, the magnetic force acts as a centripetal force, causing the particle to follow a circular path.</p>
+                 <p class="formula">r = (m * v) / (|q| * B)</p>
+                <div class="visualization-container">
+                    <canvas id="canvasCircularMotion" width="400" height="300"></canvas>
+                    <div class="controls">
+                         <label for="particleMass">Mass (m): <span id="particleMassValue">1</span> x10⁻²⁷ kg (proton-like)</label>
+                        <input type="range" id="particleMass" min="0.1" max="10" value="1" step="0.1">
+                         <label for="particleCharge">Charge (q): <span id="particleChargeValue">1.6</span> x10⁻¹⁹ C</label>
+                        <input type="range" id="particleCharge" min="-3.2" max="3.2" value="1.6" step="0.1"> <!-- In units of e -->
+                        <label for="particleVelocity">Velocity (v): <span id="particleVelocityValue">1</span> x10⁶ m/s</label>
+                        <input type="range" id="particleVelocity" min="0.1" max="5" value="1" step="0.1">
+                        <label for="magneticFieldBCirc">Mag. Field (B): <span id="magneticFieldBCircValue">0.5</span> T (Into Page)</label>
+                        <input type="range" id="magneticFieldBCirc" min="0.05" max="1" value="0.5" step="0.05">
+                        <p style="font-style: italic;">(Velocity is assumed perpendicular to B)</p>
+                    </div>
+                 </div>
+                 <div class="output" id="outputCircularMotion">Radius of Path (r): ... m</div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Constants
+            const G = 6.674e-11; // Gravitational constant
+            const k = 8.9875e9;  // Coulomb's constant
+            const e = 1.602e-19; // Elementary charge
+            const scaleFactorDist = 1; // Pixels per meter or cm (adjust per canvas)
+            const nC = 1e-9; // Nano Coulombs
+            const uC = 1e-6; // Micro Coulombs
+            const M_earth_like = 5.972e24; // For orbit default
+
+            // --- Tab Navigation ---
+            const navLinks = document.querySelectorAll('nav a');
+            const topics = document.querySelectorAll('.topic');
+
+            function setActiveTab(hash) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === hash) {
+                        link.classList.add('active');
+                    }
+                });
+                topics.forEach(topic => {
+                    topic.classList.remove('active');
+                    if (`#${topic.id}` === hash) {
+                        topic.classList.add('active');
+                    }
+                });
+                 // Trigger initial draw for the newly activated tab
+                 const activeTopicId = hash.substring(1); // Remove #
+                 if (window[`draw${capitalizeFirstLetter(activeTopicId)}`]) {
+                     window[`draw${capitalizeFirstLetter(activeTopicId)}`]();
+                 }
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const targetHash = link.getAttribute('href');
+                    setActiveTab(targetHash);
+                     // Optionally update URL hash without page jump
+                     // history.pushState(null, null, targetHash);
+                });
+            });
+
+             // Activate tab based on URL hash or default to Day 1
+            const currentHash = window.location.hash || '#day1';
+            setActiveTab(currentHash);
+
+             // Helper to capitalize first letter for function calls
+             function capitalizeFirstLetter(string) {
+                 return string.charAt(0).toUpperCase() + string.slice(1);
+             }
+
+             // --- Helper Functions ---
+             function drawArrow(ctx, x1, y1, x2, y2, arrowSize = 5) {
+                 const angle = Math.atan2(y2 - y1, x2 - x1);
+                 ctx.beginPath();
+                 ctx.moveTo(x1, y1);
+                 ctx.lineTo(x2, y2);
+                 ctx.stroke();
+                 // Arrowhead
+                 ctx.beginPath();
+                 ctx.moveTo(x2, y2);
+                 ctx.lineTo(x2 - arrowSize * Math.cos(angle - Math.PI / 6), y2 - arrowSize * Math.sin(angle - Math.PI / 6));
+                 ctx.lineTo(x2 - arrowSize * Math.cos(angle + Math.PI / 6), y2 - arrowSize * Math.sin(angle + Math.PI / 6));
+                 ctx.closePath();
+                 ctx.fill();
+             }
+
+             function drawCharge(ctx, x, y, radius, charge) {
+                 ctx.beginPath();
+                 ctx.arc(x, y, radius, 0, 2 * Math.PI);
+                 ctx.fillStyle = charge > 0 ? '#dc3545' : (charge < 0 ? '#007bff' : '#6c757d'); // Red+, Blue-, Gray0
+                 ctx.fill();
+                 ctx.fillStyle = '#fff';
+                 ctx.textAlign = 'center';
+                 ctx.textBaseline = 'middle';
+                 ctx.font = `${radius*1.2}px sans-serif`;
+                 ctx.fillText(charge > 0 ? '+' : (charge < 0 ? '-' : '0'), x, y);
+             }
+
+             function drawMass(ctx, x, y, radius) {
+                 ctx.beginPath();
+                 ctx.arc(x, y, radius, 0, 2 * Math.PI);
+                 ctx.fillStyle = '#6c757d'; // Gray
+                 ctx.fill();
+             }
+             function drawFieldLinesPoint(ctx, cx, cy, charge, numLines = 16) {
+                 const radius = Math.abs(charge) * 2 + 10; // Adjust density
+                 ctx.strokeStyle = '#007bff'; // Blue
+                 ctx.lineWidth = 1;
+                 for (let i = 0; i < numLines; i++) {
+                     const angle = (i / numLines) * 2 * Math.PI;
+                     const startX = cx + radius * Math.cos(angle);
+                     const startY = cy + radius * Math.sin(angle);
+                     const endX = cx + (radius + 50 + Math.abs(charge)*2) * Math.cos(angle);
+                     const endY = cy + (radius + 50 + Math.abs(charge)*2) * Math.sin(angle);
+                     if (charge > 0) { // Outward
+                         drawArrow(ctx, startX, startY, endX, endY, 5);
+                     } else if (charge < 0) { // Inward
+                         drawArrow(ctx, endX, endY, startX, startY, 5);
+                     }
+                 }
+             }
+             function drawFieldLinesPlates(ctx, x, yTop, yBottom, width, voltage, separationCm) {
+                 const numLines = 10;
+                 const spacing = width / (numLines + 1);
+                 const dir = voltage > 0 ? 1 : -1; // Field from + to - (top is high V if V>0)
+                 const yStart = dir > 0 ? yTop : yBottom;
+                 const yEnd = dir > 0 ? yBottom : yTop;
+
+                 ctx.strokeStyle = '#007bff';
+                 ctx.fillStyle = '#007bff';
+                 ctx.lineWidth = 1;
+
+                 // Draw plates
+                 ctx.fillStyle = '#ccc';
+                 ctx.fillRect(x, yTop - 5, width, 10);
+                 ctx.fillRect(x, yBottom - 5, width, 10);
+                 ctx.fillStyle = '#333';
+                 ctx.textAlign = 'left';
+                 ctx.fillText(voltage > 0 ? '+' : '-', x - 15, yTop);
+                 ctx.fillText(voltage > 0 ? '-' : '+', x - 15, yBottom);
+
+
+                 for (let i = 1; i <= numLines; i++) {
+                     const lineX = x + i * spacing;
+                     drawArrow(ctx, lineX, yStart + 5*dir, lineX, yEnd - 5*dir, 5);
+                 }
+             }
+              function drawEquipotentialLinesPoint(ctx, cx, cy, charge, Vstep = 5) {
+                 ctx.strokeStyle = 'green';
+                 ctx.lineWidth = 1;
+                 ctx.setLineDash([4, 2]);
+                 const maxR = Math.min(cx, cy, ctx.canvas.width - cx, ctx.canvas.height - cy) - 10;
+                 if (charge === 0) return;
+
+                 const kQ = k * charge * nC;
+                 let V_ref = kQ / maxR; // Potential at max radius
+                 let r = maxR;
+
+                 // Draw outwards or inwards depending on sign and potential level
+                  let count = 0;
+                 while (r > 10 && count < 20) { // Limit number of lines
+                     const V = kQ / r;
+                     // Try to draw lines at somewhat regular potential intervals
+                     // This logic is tricky, simplified here: draw at steps relative to edge potential
+                      if (Math.abs(V - V_ref) > Math.abs(V_ref*0.5) || count < 5 ) { // Draw more lines near charge
+                            ctx.beginPath();
+                            ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+                            ctx.stroke();
+                            V_ref = V; // Update reference potential for next step
+                      }
+                     r -= maxR/15; // Step inwards
+                     count++;
+                 }
+                 ctx.setLineDash([]); // Reset dash pattern
+             }
+             function drawEquipotentialLinesPlates(ctx, x, yTop, yBottom, width, voltage, separationCm) {
+                 const numLines = 5; // Number of equipotential lines
+                 const V_top = voltage > 0 ? voltage : 0;
+                 const V_bottom = voltage > 0 ? 0 : Math.abs(voltage);
+                 const d = separationCm * 0.01; // meters
+                 const E = Math.abs(voltage) / d;
+
+                 ctx.strokeStyle = 'green';
+                 ctx.lineWidth = 1;
+                 ctx.setLineDash([4, 2]);
+                 ctx.textAlign = 'right';
+                 ctx.fillStyle='green';
+
+                 for (let i = 1; i < numLines; i++) {
+                     const fraction = i / numLines;
+                     const V_line = V_bottom + (V_top - V_bottom) * fraction;
+                     const yLine = yBottom + (yTop - yBottom) * fraction; // Position based on fraction
+                     ctx.beginPath();
+                     ctx.moveTo(x, yLine);
+                     ctx.lineTo(x + width, yLine);
+                     ctx.stroke();
+                     ctx.fillText(`${V_line.toFixed(0)}V`, x - 5, yLine);
+                 }
+
+                 ctx.setLineDash([]);
+                 ctx.textAlign = 'left'; // Reset
+             }
+
+            // --- Day 1: Gravity ---
+            const canvasGravity = document.getElementById('canvasGravity');
+            const ctxGravity = canvasGravity.getContext('2d');
+            const mass1Slider = document.getElementById('mass1');
+            const mass2Slider = document.getElementById('mass2');
+            const distanceGSlider = document.getElementById('distanceG');
+            const mass1ValueSpan = document.getElementById('mass1Value');
+            const mass2ValueSpan = document.getElementById('mass2Value');
+            const distanceGValueSpan = document.getElementById('distanceGValue');
+            const outputGravity = document.getElementById('outputGravity');
+
+            let m1Pos = { x: canvasGravity.width * 0.25, y: canvasGravity.height / 2 };
+            let m2Pos = { x: canvasGravity.width * 0.75, y: canvasGravity.height / 2 };
+
+            function drawGravity() {
+                const m1 = parseFloat(mass1Slider.value) * 1e9;
+                const m2 = parseFloat(mass2Slider.value) * 1e9;
+                const r = parseFloat(distanceGSlider.value); // Use slider value directly for distance display
+
+                mass1ValueSpan.textContent = mass1Slider.value;
+                mass2ValueSpan.textContent = mass2Slider.value;
+                distanceGValueSpan.textContent = distanceGSlider.value;
+
+                // Adjust visual separation based on slider
+                const visualSeparation = r;
+                m1Pos.x = canvasGravity.width / 2 - visualSeparation / 2;
+                m2Pos.x = canvasGravity.width / 2 + visualSeparation / 2;
+
+
+                const force = (G * m1 * m2) / (r * r);
+
+                ctxGravity.clearRect(0, 0, canvasGravity.width, canvasGravity.height);
+
+                // Draw masses (size based on slider value, not actual mass)
+                 const r1Visual = Math.sqrt(parseFloat(mass1Slider.value)) + 5;
+                 const r2Visual = Math.sqrt(parseFloat(mass2Slider.value)) + 5;
+                drawMass(ctxGravity, m1Pos.x, m1Pos.y, r1Visual);
+                drawMass(ctxGravity, m2Pos.x, m2Pos.y, r2Visual);
+
+
+                // Draw force vectors
+                const arrowLength = Math.min(50, Math.log10(force+1)*10 + 10); // Scale arrow length logarithmically
+                ctxGravity.strokeStyle = 'red';
+                ctxGravity.fillStyle = 'red';
+                drawArrow(ctxGravity, m1Pos.x + r1Visual, m1Pos.y, m1Pos.x + r1Visual + arrowLength, m1Pos.y, 6); // Force on m1
+                drawArrow(ctxGravity, m2Pos.x - r2Visual, m2Pos.y, m2Pos.x - r2Visual - arrowLength, m2Pos.y, 6); // Force on m2
+
+                outputGravity.textContent = `Force: ${force.toExponential(3)} N`;
+            }
+            mass1Slider.oninput = drawGravity;
+            mass2Slider.oninput = drawGravity;
+            distanceGSlider.oninput = drawGravity;
+            // Add dragging interactivity (optional, more complex)
+
+            // --- Day 2: Orbits ---
+            const canvasOrbit = document.getElementById('canvasOrbit');
+            const ctxOrbit = canvasOrbit.getContext('2d');
+            const centralMassSlider = document.getElementById('centralMass');
+            const orbitalRadiusSlider = document.getElementById('orbitalRadius');
+            const centralMassValueSpan = document.getElementById('centralMassValue');
+            const orbitalRadiusValueSpan = document.getElementById('orbitalRadiusValue');
+            const outputOrbit = document.getElementById('outputOrbit');
+
+            function drawOrbit() {
+                const M = parseFloat(centralMassSlider.value) * 1e24;
+                const rOrbit = parseFloat(orbitalRadiusSlider.value) * 1e6; // meters
+
+                 centralMassValueSpan.textContent = centralMassSlider.value;
+                 orbitalRadiusValueSpan.textContent = orbitalRadiusSlider.value;
+
+                const velocity = Math.sqrt((G * M) / rOrbit);
+
+                ctxOrbit.clearRect(0, 0, canvasOrbit.width, canvasOrbit.height);
+                const cx = canvasOrbit.width / 2;
+                const cy = canvasOrbit.height / 2;
+
+                // Scale orbital radius for display
+                const maxDisplayRadius = Math.min(cx, cy) - 20;
+                const minSliderR = parseFloat(orbitalRadiusSlider.min) * 1e6;
+                const maxSliderR = parseFloat(orbitalRadiusSlider.max) * 1e6;
+                 // Simple linear scaling - might need refinement if range is huge
+                 const displayRadius = maxDisplayRadius * (rOrbit - minSliderR) / (maxSliderR - minSliderR) + 15 ;
+
+
+                // Draw central mass (visual size based on slider)
+                 const centralRadiusVisual = parseFloat(centralMassSlider.value) * 1.5 + 5;
+                drawMass(ctxOrbit, cx, cy, centralRadiusVisual);
+
+
+                // Draw orbit path
+                ctxOrbit.beginPath();
+                ctxOrbit.strokeStyle = '#aaa';
+                ctxOrbit.lineWidth = 1;
+                ctxOrbit.arc(cx, cy, displayRadius, 0, 2 * Math.PI);
+                ctxOrbit.stroke();
+
+                // Draw satellite
+                 const satelliteX = cx + displayRadius;
+                 const satelliteY = cy;
+                 ctxOrbit.fillStyle = '#007bff'; // Blue satellite
+                 ctxOrbit.beginPath();
+                 ctxOrbit.arc(satelliteX, satelliteY, 5, 0, 2 * Math.PI);
+                 ctxOrbit.fill();
+
+                  // Draw velocity vector (tangential)
+                  const arrowLen = 25;
+                  ctxOrbit.strokeStyle = 'green';
+                  ctxOrbit.fillStyle = 'green';
+                  drawArrow(ctxOrbit, satelliteX, satelliteY, satelliteX, satelliteY - arrowLen, 5); // Tangential up
+
+
+                outputOrbit.textContent = `Orbital Speed: ${velocity.toFixed(0)} m/s (${(velocity/1000).toFixed(1)} km/s)`;
+            }
+            centralMassSlider.oninput = drawOrbit;
+            orbitalRadiusSlider.oninput = drawOrbit;
+
+
+            // --- Day 3: Coulomb's Law ---
+             const canvasCoulomb = document.getElementById('canvasCoulomb');
+             const ctxCoulomb = canvasCoulomb.getContext('2d');
+             const charge1Slider = document.getElementById('charge1');
+             const charge2Slider = document.getElementById('charge2');
+             const distanceCSlider = document.getElementById('distanceC');
+             const charge1ValueSpan = document.getElementById('charge1Value');
+             const charge2ValueSpan = document.getElementById('charge2Value');
+             const distanceCValueSpan = document.getElementById('distanceCValue');
+             const outputCoulomb = document.getElementById('outputCoulomb');
+
+             let q1Pos = { x: canvasCoulomb.width * 0.25, y: canvasCoulomb.height / 2 };
+             let q2Pos = { x: canvasCoulomb.width * 0.75, y: canvasCoulomb.height / 2 };
+
+             function drawCoulomb() {
+                 const q1 = parseFloat(charge1Slider.value) * nC;
+                 const q2 = parseFloat(charge2Slider.value) * nC;
+                 const rCm = parseFloat(distanceCSlider.value) ; // cm
+                 const rM = rCm * 0.01; // meters
+
+                 charge1ValueSpan.textContent = charge1Slider.value;
+                 charge2ValueSpan.textContent = charge2Slider.value;
+                 distanceCValueSpan.textContent = distanceCSlider.value;
+
+                 // Adjust visual separation based on slider (scaled)
+                 const visualSeparation = rCm * 8; // Scale factor for display
+                 q1Pos.x = canvasCoulomb.width / 2 - visualSeparation / 2;
+                 q2Pos.x = canvasCoulomb.width / 2 + visualSeparation / 2;
+
+                 const forceMag = (k * Math.abs(q1 * q2)) / (rM * rM);
+                 const isRepulsive = (q1 * q2) > 0;
+
+                 ctxCoulomb.clearRect(0, 0, canvasCoulomb.width, canvasCoulomb.height);
+
+                  // Draw charges
+                 const r1Visual = Math.sqrt(Math.abs(parseFloat(charge1Slider.value)))*2 + 6;
+                 const r2Visual = Math.sqrt(Math.abs(parseFloat(charge2Slider.value)))*2 + 6;
+                 drawCharge(ctxCoulomb, q1Pos.x, q1Pos.y, r1Visual, q1 / nC);
+                 drawCharge(ctxCoulomb, q2Pos.x, q2Pos.y, r2Visual, q2 / nC);
+
+                 // Draw force vectors
+                 const arrowLength = Math.min(60, Math.log10(forceMag*1e6+1)*10 + 10); // Scale based on microN
+                 ctxCoulomb.strokeStyle = 'red';
+                 ctxCoulomb.fillStyle = 'red';
+                 const dir1 = isRepulsive ? -1 : 1; // Direction of force on q1
+                 const dir2 = isRepulsive ? 1 : -1; // Direction of force on q2
+
+                 drawArrow(ctxCoulomb, q1Pos.x + dir1 * r1Visual, q1Pos.y, q1Pos.x + dir1 * (r1Visual + arrowLength), q1Pos.y, 6); // Force on q1
+                 drawArrow(ctxCoulomb, q2Pos.x + dir2 * r2Visual, q2Pos.y, q2Pos.x + dir2 * (r2Visual + arrowLength), q2Pos.y, 6); // Force on q2
+
+
+                 outputCoulomb.textContent = `Force: ${forceMag.toExponential(3)} N (${isRepulsive ? 'Repulsive' : 'Attractive'})`;
+             }
+             charge1Slider.oninput = drawCoulomb;
+             charge2Slider.oninput = drawCoulomb;
+             distanceCSlider.oninput = drawCoulomb;
+
+              // --- Day 4: Electric Fields ---
+            const canvasEField = document.getElementById('canvasEField');
+            const ctxEField = canvasEField.getContext('2d');
+            const fieldTypeRadios = document.querySelectorAll('input[name="fieldType"]');
+            const sourceChargeSlider = document.getElementById('sourceCharge');
+            const sourceChargeValueSpan = document.getElementById('sourceChargeValue');
+             const plateVoltageSliderE = document.getElementById('plateVoltage');
+             const plateVoltageValueSpanE = document.getElementById('plateVoltageValue');
+             const plateSeparationSliderE = document.getElementById('plateSeparation');
+             const plateSeparationValueSpanE = document.getElementById('plateSeparationValue');
+             const pointChargeControlsE = document.getElementById('pointChargeControlsE');
+             const plateControlsE = document.getElementById('plateControlsE');
+            const outputEField = document.getElementById('outputEField');
+
+            function drawEField() {
+                 ctxEField.clearRect(0, 0, canvasEField.width, canvasEField.height);
+                 const cx = canvasEField.width / 2;
+                 const cy = canvasEField.height / 2;
+                 const selectedType = document.querySelector('input[name="fieldType"]:checked').value;
+                 let E_mag = 0;
+
+                 if (selectedType === 'point') {
+                     pointChargeControlsE.style.display = 'block';
+                     plateControlsE.style.display = 'none';
+                     const Q = parseFloat(sourceChargeSlider.value) * nC;
+                     sourceChargeValueSpan.textContent = sourceChargeSlider.value;
+
+                     const rVisual = Math.abs(parseFloat(sourceChargeSlider.value)) + 6;
+                     drawCharge(ctxEField, cx, cy, rVisual, Q / nC);
+                     drawFieldLinesPoint(ctxEField, cx, cy, Q / nC); // Pass charge value for direction/density
+
+                     // Calculate field strength at some arbitrary distance (e.g., 30px from edge)
+                     const rCalc = (rVisual + 30) * 0.005; // Rough estimate of distance in m
+                     if (rCalc > 0) E_mag = (k * Math.abs(Q)) / (rCalc * rCalc);
+                     outputEField.textContent = Q !== 0 ? `Est. Field near edge: ${E_mag.toExponential(2)} N/C` : 'Field: 0 N/C';
+
+                 } else { // Parallel Plates
+                     pointChargeControlsE.style.display = 'none';
+                     plateControlsE.style.display = 'block';
+                     const V = parseFloat(plateVoltageSliderE.value);
+                     const dCm = parseFloat(plateSeparationSliderE.value);
+                     const dM = dCm * 0.01;
+                     plateVoltageValueSpanE.textContent = plateVoltageSliderE.value;
+                     plateSeparationValueSpanE.textContent = plateSeparationSliderE.value;
+
+                     const plateWidth = canvasEField.width * 0.6;
+                     const plateYGap = dCm * 5; // Visual scaling
+                     const yTop = cy - plateYGap / 2;
+                     const yBottom = cy + plateYGap / 2;
+                     const xLeft = cx - plateWidth / 2;
+
+                     drawFieldLinesPlates(ctxEField, xLeft, yTop, yBottom, plateWidth, V, dCm);
+
+                     if (dM > 0) E_mag = Math.abs(V) / dM;
+                     outputEField.textContent = `Field Strength: ${E_mag.toFixed(0)} N/C (uniform)`;
+                 }
+            }
+             fieldTypeRadios.forEach(radio => radio.onchange = drawEField);
+             sourceChargeSlider.oninput = drawEField;
+             plateVoltageSliderE.oninput = drawEField;
+             plateSeparationSliderE.oninput = drawEField;
+
+
+             // --- Day 5: Potential ---
+             const canvasPotential = document.getElementById('canvasPotential');
+             const ctxPotential = canvasPotential.getContext('2d');
+             const potentialFieldTypeRadios = document.querySelectorAll('input[name="potentialFieldType"]');
+             const sourceChargeVSlider = document.getElementById('sourceChargeV');
+             const sourceChargeVValueSpan = document.getElementById('sourceChargeVValue');
+             const plateVoltageVSlider = document.getElementById('plateVoltageV');
+             const plateVoltageVValueSpan = document.getElementById('plateVoltageVValue');
+             const plateSeparationVSlider = document.getElementById('plateSeparationV');
+             const plateSeparationVValueSpan = document.getElementById('plateSeparationVValue');
+             const pointChargeControlsV = document.getElementById('pointChargeControlsV');
+             const plateControlsV = document.getElementById('plateControlsV');
+             const outputPotential = document.getElementById('outputPotential');
+
+             let probePos = { x: canvasPotential.width * 0.75, y: canvasPotential.height * 0.25 };
+             let isDraggingProbe = false;
+
+             function drawPotential() {
+                 ctxPotential.clearRect(0, 0, canvasPotential.width, canvasPotential.height);
+                 const cx = canvasPotential.width / 2;
+                 const cy = canvasPotential.height / 2;
+                 const selectedType = document.querySelector('input[name="potentialFieldType"]:checked').value;
+                 let potentialAtProbe = 0;
+
+                 if (selectedType === 'point') {
+                     pointChargeControlsV.style.display = 'block';
+                     plateControlsV.style.display = 'none';
+                     const Q = parseFloat(sourceChargeVSlider.value) * nC;
+                     sourceChargeVValueSpan.textContent = sourceChargeVSlider.value;
+
+                     const rVisual = Math.abs(parseFloat(sourceChargeVSlider.value)) + 6;
+                     drawCharge(ctxPotential, cx, cy, rVisual, Q / nC);
+                     drawEquipotentialLinesPoint(ctxPotential, cx, cy, Q / nC);
+
+                     // Calculate potential at probe position
+                     const dx = probePos.x - cx;
+                     const dy = probePos.y - cy;
+                     const rProbeVisual = Math.sqrt(dx * dx + dy * dy);
+                     const rProbeM = rProbeVisual * 0.005; // Rough scale conversion
+                     if (rProbeM > 1e-3 && Q !== 0) { // Avoid division by zero or potential inside charge
+                         potentialAtProbe = (k * Q) / rProbeM;
+                     } else if (Q === 0) {
+                          potentialAtProbe = 0;
+                     } else {
+                         potentialAtProbe = Q > 0 ? Infinity : -Infinity; // Very close
+                     }
+
+                 } else { // Parallel Plates
+                     pointChargeControlsV.style.display = 'none';
+                     plateControlsV.style.display = 'block';
+                     const V_diff = parseFloat(plateVoltageVSlider.value);
+                     const dCm = parseFloat(plateSeparationVSlider.value);
+                     const dM = dCm * 0.01;
+                     plateVoltageVValueSpan.textContent = plateVoltageVSlider.value;
+                     plateSeparationVValueSpan.textContent = plateSeparationVSlider.value;
+
+                     const plateWidth = canvasPotential.width * 0.6;
+                     const plateYGap = dCm * 5; // Visual scaling
+                     const yTop = cy - plateYGap / 2;
+                     const yBottom = cy + plateYGap / 2;
+                     const xLeft = cx - plateWidth / 2;
+
+                      // Draw plates (similar to E-field)
+                     ctxPotential.fillStyle = '#ccc';
+                     ctxPotential.fillRect(xLeft, yTop - 5, plateWidth, 10);
+                     ctxPotential.fillRect(xLeft, yBottom - 5, plateWidth, 10);
+                      ctxPotential.fillStyle = '#333';
+                     ctxPotential.textAlign = 'left';
+                     ctxPotential.fillText(V_diff > 0 ? `+${V_diff}V` : '+0V', xLeft + plateWidth + 5, yTop);
+                     ctxPotential.fillText(V_diff > 0 ? '0V' : `${V_diff}V`, xLeft + plateWidth + 5, yBottom);
+
+
+                     drawEquipotentialLinesPlates(ctxPotential, xLeft, yTop, yBottom, plateWidth, V_diff, dCm);
+
+                      // Calculate potential at probe
+                      if (dM > 0) {
+                          const V_top_actual = V_diff > 0 ? V_diff : 0;
+                          const V_bottom_actual = V_diff > 0 ? 0 : V_diff;
+                          // Clamp probe y to be between plates for calculation
+                          const clampedY = Math.max(yTop, Math.min(yBottom, probePos.y));
+                          const fraction = (yBottom - clampedY) / (yBottom - yTop); // Fraction from bottom plate
+                          potentialAtProbe = V_bottom_actual + fraction * (V_top_actual - V_bottom_actual);
+                          if (probePos.y < yTop) potentialAtProbe = V_top_actual; // Clamp if above top
+                          if (probePos.y > yBottom) potentialAtProbe = V_bottom_actual; // Clamp if below bottom
+                      }
+                 }
+
+                 // Draw probe
+                 ctxPotential.fillStyle = 'orange';
+                 ctxPotential.beginPath();
+                 ctxPotential.arc(probePos.x, probePos.y, 5, 0, 2 * Math.PI);
+                 ctxPotential.fill();
+                 ctxPotential.strokeStyle = '#333';
+                 ctxPotential.stroke();
+
+
+                 outputPotential.textContent = `Potential at probe: ${potentialAtProbe.toFixed(1)} V`;
+             }
+
+             canvasPotential.onmousedown = (e) => {
+                 const rect = canvasPotential.getBoundingClientRect();
+                 const mouseX = e.clientX - rect.left;
+                 const mouseY = e.clientY - rect.top;
+                 const dx = mouseX - probePos.x;
+                 const dy = mouseY - probePos.y;
+                 if (dx * dx + dy * dy < 10 * 10) { // Clicked near probe
+                     isDraggingProbe = true;
+                     canvasPotential.style.cursor = 'grabbing';
+                 }
+             };
+             canvasPotential.onmousemove = (e) => {
+                 if (isDraggingProbe) {
+                     const rect = canvasPotential.getBoundingClientRect();
+                     probePos.x = e.clientX - rect.left;
+                     probePos.y = e.clientY - rect.top;
+                      // Clamp probe position within canvas bounds
+                      probePos.x = Math.max(0, Math.min(canvasPotential.width, probePos.x));
+                      probePos.y = Math.max(0, Math.min(canvasPotential.height, probePos.y));
+                     drawPotential();
+                 }
+             };
+             canvasPotential.onmouseup = () => {
+                 isDraggingProbe = false;
+                 canvasPotential.style.cursor = 'crosshair';
+             };
+              canvasPotential.onmouseleave = () => { // Stop dragging if mouse leaves canvas
+                 isDraggingProbe = false;
+                 canvasPotential.style.cursor = 'crosshair';
+             };
+
+              potentialFieldTypeRadios.forEach(radio => radio.onchange = drawPotential);
+              sourceChargeVSlider.oninput = drawPotential;
+              plateVoltageVSlider.oninput = drawPotential;
+              plateSeparationVSlider.oninput = drawPotential;
+              canvasPotential.style.cursor = 'crosshair'; // Initial cursor
+
+
+             // --- Day 6: Potential Energy ---
+             const canvasPE = document.getElementById('canvasPotentialEnergy');
+             const ctxPE = canvasPE.getContext('2d');
+             const charge1PESlider = document.getElementById('charge1PE');
+             const charge2PESlider = document.getElementById('charge2PE');
+             const distancePESlider = document.getElementById('distancePE');
+             const charge1PEValueSpan = document.getElementById('charge1PEValue');
+             const charge2PEValueSpan = document.getElementById('charge2PEValue');
+             const distancePEValueSpan = document.getElementById('distancePEValue');
+             const outputPE = document.getElementById('outputPotentialEnergy');
+
+             let q1PEPos = { x: canvasPE.width * 0.25, y: canvasPE.height / 2 };
+             let q2PEPos = { x: canvasPE.width * 0.75, y: canvasPE.height / 2 };
+
+             function drawPotentialEnergy() {
+                  const q1 = parseFloat(charge1PESlider.value) * nC;
+                  const q2 = parseFloat(charge2PESlider.value) * nC;
+                  const rCm = parseFloat(distancePESlider.value) ; // cm
+                  const rM = rCm * 0.01; // meters
+
+                  charge1PEValueSpan.textContent = charge1PESlider.value;
+                  charge2PEValueSpan.textContent = charge2PESlider.value;
+                  distancePEValueSpan.textContent = distancePESlider.value;
+
+                   // Adjust visual separation
+                  const visualSeparation = rCm * 8; // Scale factor for display
+                  q1PEPos.x = canvasPE.width / 2 - visualSeparation / 2;
+                  q2PEPos.x = canvasPE.width / 2 + visualSeparation / 2;
+
+                  let potentialEnergy = 0;
+                  if (rM > 0) {
+                      potentialEnergy = (k * q1 * q2) / rM;
+                  }
+
+                  ctxPE.clearRect(0, 0, canvasPE.width, canvasPE.height);
+
+                  // Draw charges
+                  const r1Visual = Math.sqrt(Math.abs(parseFloat(charge1PESlider.value)))*2 + 6;
+                  const r2Visual = Math.sqrt(Math.abs(parseFloat(charge2PESlider.value)))*2 + 6;
+                  drawCharge(ctxPE, q1PEPos.x, q1PEPos.y, r1Visual, q1 / nC);
+                  drawCharge(ctxPE, q2PEPos.x, q2PEPos.y, r2Visual, q2 / nC);
+
+                  // Indicate Positive/Negative Energy
+                  ctxPE.fillStyle = '#333';
+                  ctxPE.textAlign = 'center';
+                  ctxPE.font = '14px sans-serif';
+                 const energySign = potentialEnergy > 0 ? '(Positive U - Repulsive tendency)' : potentialEnergy < 0 ? '(Negative U - Attractive tendency)' : '(Zero U)';
+                  ctxPE.fillText(energySign, canvasPE.width / 2, canvasPE.height - 20);
+
+
+                  outputPE.textContent = `Potential Energy: ${potentialEnergy.toExponential(3)} J`;
+             }
+              charge1PESlider.oninput = drawPotentialEnergy;
+              charge2PESlider.oninput = drawPotentialEnergy;
+              distancePESlider.oninput = drawPotentialEnergy;
+
+
+              // --- Day 7: Magnetic Field around Wire ---
+             const canvasMagWire = document.getElementById('canvasMagFieldWire');
+             const ctxMagWire = canvasMagWire.getContext('2d');
+             const currentISlider = document.getElementById('currentI');
+             const currentIValueSpan = document.getElementById('currentIValue');
+             const outputMagWire = document.getElementById('outputMagFieldWire');
+
+             function drawMagFieldWire() {
+                  const I = parseFloat(currentISlider.value);
+                  currentIValueSpan.textContent = currentISlider.value;
+
+                  ctxMagWire.clearRect(0, 0, canvasMagWire.width, canvasMagWire.height);
+                  const cx = canvasMagWire.width / 2;
+                  const cy = canvasMagWire.height / 2;
+
+                  // Draw wire cross-section
+                  ctxMagWire.fillStyle = '#6c757d'; // Gray wire
+                  ctxMagWire.beginPath();
+                  ctxMagWire.arc(cx, cy, 8, 0, 2 * Math.PI);
+                  ctxMagWire.fill();
+
+                  ctxMagWire.strokeStyle = '#000';
+                  ctxMagWire.lineWidth = 2;
+                  if (I > 0) { // Current Out of Page (Dot)
+                       ctxMagWire.beginPath();
+                       ctxMagWire.arc(cx, cy, 3, 0, 2 * Math.PI);
+                       ctxMagWire.stroke();
+                  } else if (I < 0) { // Current Into Page (Cross)
+                       ctxMagWire.beginPath();
+                       ctxMagWire.moveTo(cx - 4, cy - 4);
+                       ctxMagWire.lineTo(cx + 4, cy + 4);
+                       ctxMagWire.moveTo(cx + 4, cy - 4);
+                       ctxMagWire.lineTo(cx - 4, cy + 4);
+                       ctxMagWire.stroke();
+                  } else { // Zero Current
+                      ctxMagWire.fillStyle='#000';
+                      ctxMagWire.font = '10px sans-serif';
+                      ctxMagWire.textAlign='center';
+                      ctxMagWire.fillText('I=0', cx, cy+15);
+                  }
+
+
+                  // Draw Field Lines (Concentric Circles)
+                  if (I !== 0) {
+                      const numRings = 4;
+                      const maxRadius = Math.min(cx, cy) - 15;
+                      const ringSpacing = maxRadius / (numRings + 1);
+                      const arrowDir = I > 0 ? -1 : 1; // RHR: Thumb Out -> Fingers CCW (-1), Thumb In -> Fingers CW (1)
+                      const fieldStrengthFactor = Math.log10(Math.abs(I) + 1) + 1; // Density ~ log(I)
+
+                      ctxMagWire.strokeStyle = 'blue';
+                      ctxMagWire.fillStyle = 'blue';
+                      ctxMagWire.lineWidth = 1;
+
+                      for (let i = 1; i <= numRings; i++) {
+                          const radius = ringSpacing * i;
+                          ctxMagWire.beginPath();
+                          ctxMagWire.arc(cx, cy, radius, 0, 2 * Math.PI);
+                          ctxMagWire.stroke();
+
+                           // Add direction arrows
+                          const numArrows = Math.max(4, Math.floor(fieldStrengthFactor * 2)); // More arrows for stronger field
+                          for(let j=0; j<numArrows; j++){
+                               const angle = (j / numArrows) * 2 * Math.PI;
+                               const arrowAngle = angle + arrowDir * Math.PI / 2; // Tangential direction
+                               const ax = cx + radius * Math.cos(angle);
+                               const ay = cy + radius * Math.sin(angle);
+                               const arrowLen = 5;
+                               const dx = arrowLen * Math.cos(arrowAngle);
+                               const dy = arrowLen * Math.sin(arrowAngle);
+                               drawArrow(ctxMagWire, ax-dx/2, ay-dy/2, ax+dx/2, ay+dy/2, 4);
+                          }
+                      }
+                       outputMagWire.textContent = `Field Lines (Direction: ${I > 0 ? 'Counter-Clockwise' : 'Clockwise'})`;
+                  } else {
+                       outputMagWire.textContent = 'No Magnetic Field (I=0)';
+                  }
+
+
+             }
+             currentISlider.oninput = drawMagFieldWire;
+
+
+            // --- Day 8: Magnetic Force on Moving Charge ---
+            const canvasMagForceCharge = document.getElementById('canvasMagForceCharge');
+            const ctxMagForceCharge = canvasMagForceCharge.getContext('2d');
+            const chargeQSlider = document.getElementById('chargeQ');
+            const velocityXSlider = document.getElementById('velocityX');
+            const magneticFieldBSlider = document.getElementById('magneticFieldB');
+            const angleThetaChargeSlider = document.getElementById('angleThetaCharge');
+             const chargeQValueSpan = document.getElementById('chargeQValue');
+             const velocityXValueSpan = document.getElementById('velocityXValue');
+             const magneticFieldBValueSpan = document.getElementById('magneticFieldBValue');
+             const angleThetaChargeValueSpan = document.getElementById('angleThetaChargeValue');
+            const outputMagForceCharge = document.getElementById('outputMagForceCharge');
+
+            function drawMagForceCharge() {
+                const q = parseFloat(chargeQSlider.value) * uC; // microCoulombs
+                const v = parseFloat(velocityXSlider.value);
+                const B = parseFloat(magneticFieldBSlider.value); // Assumed into page (-) or out of page (+)
+                const thetaRad = parseFloat(angleThetaChargeSlider.value) * Math.PI / 180;
+
+                chargeQValueSpan.textContent = chargeQSlider.value;
+                velocityXValueSpan.textContent = velocityXSlider.value;
+                magneticFieldBValueSpan.textContent = magneticFieldBSlider.value;
+                angleThetaChargeValueSpan.textContent = angleThetaChargeSlider.value;
+
+                 // Force calculation (Assume B is perpendicular to the canvas)
+                 // F = q * v * B_perpendicular
+                 // B_perpendicular = B * sin(theta) where theta is angle between v and B
+                const forceMag = Math.abs(q * v * B * Math.sin(thetaRad));
+
+                ctxMagForceCharge.clearRect(0, 0, canvasMagForceCharge.width, canvasMagForceCharge.height);
+                const cx = canvasMagForceCharge.width / 2;
+                const cy = canvasMagForceCharge.height / 2;
+
+                // Draw Magnetic Field (dots for out, crosses for in)
+                 const fieldSpacing = 30;
+                 ctxMagForceCharge.strokeStyle = '#aaa';
+                 ctxMagForceCharge.lineWidth = 1;
+                  const fieldSymbol = B >= 0 ? 'dot' : 'cross'; // Assume +B = Out, -B = In (adjust if needed)
+                  if (B !== 0) {
+                     for (let x = fieldSpacing / 2; x < canvasMagForceCharge.width; x += fieldSpacing) {
+                         for (let y = fieldSpacing / 2; y < canvasMagForceCharge.height; y += fieldSpacing) {
+                             if (fieldSymbol === 'dot') {
+                                 ctxMagForceCharge.beginPath();
+                                 ctxMagForceCharge.arc(x, y, 2, 0, 2 * Math.PI);
+                                 ctxMagForceCharge.stroke();
+                             } else {
+                                 ctxMagForceCharge.beginPath();
+                                 ctxMagForceCharge.moveTo(x - 3, y - 3);
+                                 ctxMagForceCharge.lineTo(x + 3, y + 4);
+                                 ctxMagForceCharge.moveTo(x + 3, y - 3);
+                                 ctxMagForceCharge.lineTo(x - 3, y + 3);
+                                 ctxMagForceCharge.stroke();
+                             }
+                         }
+                     }
+                  }
+                 ctxMagForceCharge.fillStyle='#aaa';
+                 ctxMagForceCharge.textAlign='center';
+                 ctxMagForceCharge.fillText(`B = ${B.toFixed(2)} T ${B > 0 ? '(Out)' : B < 0 ? '(In)' : '(Zero)'}`, cx, 15);
+
+                 // Draw charge at center
+                 if (q !== 0) {
+                      drawCharge(ctxMagForceCharge, cx, cy, 8, q / uC);
+                 } else {
+                      ctxMagForceCharge.fillStyle = '#6c757d';
+                      ctxMagForceCharge.beginPath();
+                      ctxMagForceCharge.arc(cx, cy, 8, 0, 2 * Math.PI);
+                      ctxMagForceCharge.fill();
+                      ctxMagForceCharge.fillStyle='#fff';
+                      ctxMagForceCharge.fillText('0', cx, cy);
+                 }
+
+
+                 // Draw velocity vector (always horizontal for this visualization)
+                 const vArrowLen = 40;
+                 ctxMagForceCharge.strokeStyle = 'green';
+                 ctxMagForceCharge.fillStyle = 'green';
+                 drawArrow(ctxMagForceCharge, cx, cy, cx + vArrowLen, cy, 5);
+                 ctxMagForceCharge.fillText('v', cx + vArrowLen + 10, cy);
+
+
+                 // Determine Force Direction (Right Hand Rule logic)
+                 // Assuming B is into (-) or out (+) of page, v is horizontal (+)
+                 // RHR (positive q): v(thumb) -> B(fingers, into/out) -> F(palm)
+                 let forceDir = 0; // 0: none, 1: up, -1: down
+                 if (q !== 0 && B !== 0 && v !== 0 && Math.sin(thetaRad) !== 0) {
+                     const effectiveQSign = q > 0 ? 1 : -1;
+                     const effectiveBSign = B > 0 ? 1 : -1; // 1: Out, -1: In
+                      // If B is In (-1), v is Right (+), q is +: F is Up (1)
+                      // If B is Out (1), v is Right (+), q is +: F is Down (-1)
+                     forceDir = effectiveQSign * (-effectiveBSign); // B sign reversed as Out=+
+                 }
+
+
+                  // Draw Force Vector
+                 if (forceMag > 1e-9) { // Only draw if significant
+                      const fArrowLen = Math.min(60, Math.log10(forceMag*1e6 + 1)*10 + 10); // Scale based on microN
+                      ctxMagForceCharge.strokeStyle = 'red';
+                      ctxMagForceCharge.fillStyle = 'red';
+                      if (forceDir === 1) { // Up
+                          drawArrow(ctxMagForceCharge, cx, cy, cx, cy - fArrowLen, 5);
+                          ctxMagForceCharge.fillText('F', cx, cy - fArrowLen - 10);
+                      } else if (forceDir === -1) { // Down
+                          drawArrow(ctxMagForceCharge, cx, cy, cx, cy + fArrowLen, 5);
+                          ctxMagForceCharge.fillText('F', cx, cy + fArrowLen + 10);
+                      }
+                 }
+
+
+                outputMagForceCharge.textContent = `Force: ${forceMag.toExponential(3)} N`;
+            }
+             chargeQSlider.oninput = drawMagForceCharge;
+             velocityXSlider.oninput = drawMagForceCharge;
+             magneticFieldBSlider.oninput = drawMagForceCharge;
+             angleThetaChargeSlider.oninput = drawMagForceCharge;
+
+
+             // --- Day 9: Magnetic Force on Wire ---
+            const canvasMagForceWire = document.getElementById('canvasMagForceWire');
+            const ctxMagForceWire = canvasMagForceWire.getContext('2d');
+             const currentIWSlider = document.getElementById('currentIW');
+             const wireLengthSlider = document.getElementById('wireLength');
+             const magneticFieldBWSlider = document.getElementById('magneticFieldBW');
+             const angleThetaWireSlider = document.getElementById('angleThetaWire');
+             const currentIWValueSpan = document.getElementById('currentIWValue');
+             const wireLengthValueSpan = document.getElementById('wireLengthValue');
+             const magneticFieldBWValueSpan = document.getElementById('magneticFieldBWValue');
+             const angleThetaWireValueSpan = document.getElementById('angleThetaWireValue');
+            const outputMagForceWire = document.getElementById('outputMagForceWire');
+
+             function drawMagForceWire() {
+                 const I = parseFloat(currentIWSlider.value);
+                 const L = parseFloat(wireLengthSlider.value); // Use actual length for calc
+                 const B = parseFloat(magneticFieldBWSlider.value); // Assume into/out of page
+                 const thetaRad = parseFloat(angleThetaWireSlider.value) * Math.PI / 180;
+
+                 currentIWValueSpan.textContent = currentIWSlider.value;
+                 wireLengthValueSpan.textContent = wireLengthSlider.value;
+                 magneticFieldBWValueSpan.textContent = magneticFieldBWSlider.value;
+                 angleThetaWireValueSpan.textContent = angleThetaWireSlider.value;
+
+
+                 const forceMag = Math.abs(I * L * B * Math.sin(thetaRad));
+
+                 ctxMagForceWire.clearRect(0, 0, canvasMagForceWire.width, canvasMagForceWire.height);
+                 const cx = canvasMagForceWire.width / 2;
+                 const cy = canvasMagForceWire.height / 2;
+                 const wireVisualLength = 200; // Fixed visual length
+
+                 // Draw Magnetic Field (same as Day 8)
+                 const fieldSpacing = 30;
+                 ctxMagForceWire.strokeStyle = '#aaa';
+                 ctxMagForceWire.lineWidth = 1;
+                  const fieldSymbol = B >= 0 ? 'dot' : 'cross';
+                  if (B !== 0) {
+                     for (let x = fieldSpacing / 2; x < canvasMagForceWire.width; x += fieldSpacing) {
+                         for (let y = fieldSpacing / 2; y < canvasMagForceWire.height; y += fieldSpacing) {
+                             if (fieldSymbol === 'dot') { /* Draw dot */ ctxMagForceWire.beginPath(); ctxMagForceWire.arc(x, y, 2, 0, 2 * Math.PI); ctxMagForceWire.stroke(); }
+                             else { /* Draw cross */ ctxMagForceWire.beginPath(); ctxMagForceWire.moveTo(x-3,y-3); ctxMagForceWire.lineTo(x+3,y+3); ctxMagForceWire.moveTo(x+3,y-3); ctxMagForceWire.lineTo(x-3,y+3); ctxMagForceWire.stroke(); }
+                         }
+                     }
+                 }
+                  ctxMagForceWire.fillStyle='#aaa';
+                  ctxMagForceWire.textAlign='center';
+                 ctxMagForceWire.fillText(`B = ${B.toFixed(2)} T ${B > 0 ? '(Out)' : B < 0 ? '(In)' : '(Zero)'}`, cx, 15);
+
+
+                 // Draw Wire Segment (horizontal)
+                 const wireX1 = cx - wireVisualLength / 2;
+                 const wireX2 = cx + wireVisualLength / 2;
+                 ctxMagForceWire.strokeStyle = '#6c757d'; // Gray wire
+                 ctxMagForceWire.lineWidth = 4;
+                 ctxMagForceWire.beginPath();
+                 ctxMagForceWire.moveTo(wireX1, cy);
+                 ctxMagForceWire.lineTo(wireX2, cy);
+                 ctxMagForceWire.stroke();
+
+                 // Indicate Current Direction
+                 if (I !== 0) {
+                     ctxMagForceWire.strokeStyle = 'green';
+                     ctxMagForceWire.fillStyle = 'green';
+                     ctxMagForceWire.lineWidth = 1;
+                     const arrowStart = I > 0 ? wireX1 + 5 : wireX2 - 5;
+                     const arrowEnd = I > 0 ? wireX1 + 25 : wireX2 - 25;
+                     drawArrow(ctxMagForceWire, arrowStart, cy - 10, arrowEnd, cy - 10, 5);
+                     ctxMagForceWire.fillText(`I = ${I.toFixed(1)} A`, I > 0 ? arrowEnd + 5 : arrowEnd - 35, cy - 10);
+                 }
+
+                 // Determine Force Direction (RHR: Thumb I, Fingers B, Palm F)
+                  let forceDir = 0; // 0: none, 1: up, -1: down
+                 if (I !== 0 && B !== 0 && L !== 0 && Math.sin(thetaRad) !== 0) {
+                     const effectiveISign = I > 0 ? 1 : -1; // 1: Right, -1: Left (but we fixed I direction visually)
+                     const effectiveBSign = B > 0 ? 1 : -1; // 1: Out, -1: In
+                     // If B is In (-1), I is Right (vis +), F is Up (1)
+                      // If B is Out (1), I is Right (vis +), F is Down (-1)
+                      // Need to use the actual sign of I from slider
+                     forceDir = effectiveISign * (-effectiveBSign);
+                 }
+
+                 // Draw Force Vector on wire
+                 if (forceMag > 1e-4) { // Threshold for visibility
+                     const fArrowLen = Math.min(60, Math.log10(forceMag*10 + 1)*10 + 10); // Scale force display
+                     ctxMagForceWire.strokeStyle = 'red';
+                     ctxMagForceWire.fillStyle = 'red';
+                     ctxMagForceWire.lineWidth=2;
+                     if (forceDir === 1) { // Up
+                         drawArrow(ctxMagForceWire, cx, cy, cx, cy - fArrowLen, 6);
+                         ctxMagForceWire.fillText('F', cx + 10, cy - fArrowLen / 2);
+                     } else if (forceDir === -1) { // Down
+                         drawArrow(ctxMagForceWire, cx, cy, cx, cy + fArrowLen, 6);
+                         ctxMagForceWire.fillText('F', cx + 10, cy + fArrowLen / 2);
+                     }
+                 }
+
+
+                 outputMagForceWire.textContent = `Force: ${forceMag.toExponential(3)} N`;
+             }
+              currentIWSlider.oninput = drawMagForceWire;
+              wireLengthSlider.oninput = drawMagForceWire;
+              magneticFieldBWSlider.oninput = drawMagForceWire;
+              angleThetaWireSlider.oninput = drawMagForceWire;
+
+
+            // --- Day 10: Circular Motion in B Field ---
+            const canvasCircMotion = document.getElementById('canvasCircularMotion');
+            const ctxCircMotion = canvasCircMotion.getContext('2d');
+            const particleMassSlider = document.getElementById('particleMass');
+            const particleChargeSlider = document.getElementById('particleCharge');
+            const particleVelocitySlider = document.getElementById('particleVelocity');
+            const magneticFieldBCircSlider = document.getElementById('magneticFieldBCirc');
+             const particleMassValueSpan = document.getElementById('particleMassValue');
+             const particleChargeValueSpan = document.getElementById('particleChargeValue');
+             const particleVelocityValueSpan = document.getElementById('particleVelocityValue');
+             const magneticFieldBCircValueSpan = document.getElementById('magneticFieldBCircValue');
+            const outputCircMotion = document.getElementById('outputCircularMotion');
+
+             function drawCircularMotion() {
+                 const m = parseFloat(particleMassSlider.value) * 1e-27; // kg
+                 const qRaw = parseFloat(particleChargeSlider.value);
+                 const q = qRaw * e; // Coulombs
+                 const v = parseFloat(particleVelocitySlider.value) * 1e6; // m/s
+                 const B = parseFloat(magneticFieldBCircSlider.value); // T (Assume Into page for simplicity)
+
+                 particleMassValueSpan.textContent = particleMassSlider.value;
+                 particleChargeValueSpan.textContent = particleChargeSlider.value; // Display raw value (multiple of e)
+                 particleVelocityValueSpan.textContent = particleVelocitySlider.value;
+                 magneticFieldBCircValueSpan.textContent = magneticFieldBCircSlider.value;
+
+
+                 let radius = Infinity;
+                 if (Math.abs(q) > 1e-25 && B !== 0) { // Avoid division by zero
+                     radius = (m * v) / (Math.abs(q) * B);
+                 }
+
+                 ctxCircMotion.clearRect(0, 0, canvasCircMotion.width, canvasCircMotion.height);
+                 const entryPointY = canvasCircMotion.height / 2;
+                 const entryPointX = 10; // Start just inside left edge
+
+                  // Draw Magnetic Field Region (e.g., right half, always 'In')
+                  const fieldXStart = 0; // Field covers whole canvas
+                  ctxCircMotion.fillStyle = '#e0f7fa'; // Light blue background for field region
+                  ctxCircMotion.fillRect(fieldXStart, 0, canvasCircMotion.width - fieldXStart, canvasCircMotion.height);
+                  ctxCircMotion.strokeStyle = '#aaa';
+                  ctxCircMotion.lineWidth = 1;
+                  const fieldSpacing = 25;
+                   for (let x = fieldXStart + fieldSpacing/2; x < canvasCircMotion.width; x += fieldSpacing) {
+                       for (let y = fieldSpacing / 2; y < canvasCircMotion.height; y += fieldSpacing) {
+                          // Draw cross for 'In' field
+                           ctxCircMotion.beginPath(); ctxCircMotion.moveTo(x-3,y-3); ctxCircMotion.lineTo(x+3,y+3); ctxCircMotion.moveTo(x+3,y-3); ctxCircMotion.lineTo(x-3,y+3); ctxCircMotion.stroke();
+                       }
+                   }
+                 ctxCircMotion.fillStyle='#aaa';
+                 ctxCircMotion.textAlign='center';
+                 ctxCircMotion.fillText(`B = ${B.toFixed(2)} T (In)`, canvasCircMotion.width/2, 15);
+
+
+                  // Determine path direction
+                 // RHR: v(Right), B(In), F(Up for +, Down for -)
+                 const deflectionDir = q > 0 ? -1 : 1; // -1: Upward curve, 1: Downward curve
+
+
+                  // Draw path
+                  if (radius === Infinity || Math.abs(q) < 1e-25 || B === 0) { // Straight line
+                      ctxCircMotion.beginPath();
+                      ctxCircMotion.moveTo(0, entryPointY);
+                      ctxCircMotion.lineTo(canvasCircMotion.width, entryPointY);
+                      ctxCircMotion.strokeStyle = 'red';
+                      ctxCircMotion.lineWidth = 2;
+                      ctxCircMotion.stroke();
+                       outputCircMotion.textContent = 'Radius of Path (r): ∞ (Straight)';
+                  } else {
+                       // Scale radius for display
+                       const visualScale = 5e7; // Adjust this to make radii look reasonable
+                       const visualRadius = radius * visualScale;
+                       const circCenterX = entryPointX;
+                       const circCenterY = entryPointY + deflectionDir * visualRadius;
+
+                       ctxCircMotion.beginPath();
+                       ctxCircMotion.strokeStyle = 'red';
+                       ctxCircMotion.lineWidth = 2;
+
+                       // Calculate start and end angles for arc
+                       const startAngle = deflectionDir > 0 ? -Math.PI/2 : Math.PI/2 ; // Entering horizontally
+
+                       // Find where the circle exits the canvas or completes half-circle
+                       let endAngle;
+                       if(Math.abs(visualRadius) < entryPointX){ // Very tight circle completes inside
+                            endAngle = startAngle + Math.PI * deflectionDir;
+                       } else {
+                           // Check intersection with right edge (x = width)
+                           const dx = canvasCircMotion.width - circCenterX;
+                           if (dx < visualRadius) {
+                               const angleToExit = Math.acos(dx / visualRadius);
+                               endAngle = deflectionDir > 0 ? -Math.PI / 2 + angleToExit * deflectionDir : Math.PI / 2 + angleToExit*deflectionDir ;
+                           } else { // Completes half circle within canvas width
+                                endAngle = startAngle + Math.PI * deflectionDir;
+                           }
+                            // Check intersection with top/bottom edge (more complex, simplified here)
+                       }
+
+
+                       ctxCircMotion.arc(circCenterX, circCenterY, visualRadius, startAngle, endAngle, q < 0); // Anticlockwise for negative q? Check logic
+                       ctxCircMotion.stroke();
+
+                        outputCircMotion.textContent = `Radius of Path (r): ${radius.toExponential(3)} m`;
+                  }
+
+
+                 // Draw entry particle & velocity vector
+                 drawCharge(ctxCircMotion, entryPointX, entryPointY, 5, qRaw); // Use raw charge for label
+                 ctxCircMotion.strokeStyle='green';
+                 ctxCircMotion.fillStyle='green';
+                 drawArrow(ctxCircMotion, entryPointX-15, entryPointY, entryPointX, entryPointY, 4); // Incoming velocity
+
+
+             }
+
+             particleMassSlider.oninput = drawCircularMotion;
+             particleChargeSlider.oninput = drawCircularMotion;
+             particleVelocitySlider.oninput = drawCircularMotion;
+             magneticFieldBCircSlider.oninput = drawCircularMotion;
+
+            // Initial draw for default tab
+            if (window[`draw${capitalizeFirstLetter(currentHash.substring(1))}`]) {
+                 window[`draw${capitalizeFirstLetter(currentHash.substring(1))}`]();
+            } else {
+                 drawDay1(); // Fallback
+            }
+
+            // Make draw functions global for tab switching
+            window.drawDay1 = drawGravity;
+            window.drawDay2 = drawOrbit;
+            window.drawDay3 = drawCoulomb;
+             window.drawDay4 = drawEField;
+             window.drawDay5 = drawPotential;
+             window.drawDay6 = drawPotentialEnergy;
+             window.drawDay7 = drawMagFieldWire;
+             window.drawDay8 = drawMagForceCharge;
+             window.drawDay9 = drawMagForceWire;
+             window.drawDay10 = drawCircularMotion;
+
+        });
+    </script>
+
+</body>
+</html>
